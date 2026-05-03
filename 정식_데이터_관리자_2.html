@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TED – The Entry Data</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --c1:#FF6B6B; --c2:#FFB347; --c3:#6BCB77; --c4:#4D96FF; --c5:#FF922B; --c6:#9B5DE5; --c7:#00BBD4; --c8:#F72585;
+  --bg:#F5F7FF; --bg2:#EEF1FF; --bg3:#fff;
+  --card:#ffffff; --card2:#F8F9FF;
+  --text:#1a1a2e; --text2:#4a4a7a; --text3:#8888bb;
+  --border:#E0E4FF;
+  --radius:16px; --radius-sm:10px;
+  --shadow:0 4px 20px rgba(77,150,255,0.10);
+  --shadow-hover:0 8px 32px rgba(77,150,255,0.18);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+.page { display:none; }
+.page.active { display:block; }
+
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:var(--bg2); }
+::-webkit-scrollbar-thumb { background:var(--c4); border-radius:3px; }
+
+/* ===== LOGIN ===== */
+.login-bg {
+  min-height:100vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:2rem 1rem; background:var(--bg);
+  position:relative; overflow:hidden;
+}
+.login-bg::before {
+  content:''; position:absolute; width:400px; height:400px; border-radius:50%;
+  background:radial-gradient(circle,rgba(77,150,255,0.12) 0%,transparent 70%);
+  top:-100px; left:-100px; pointer-events:none;
+}
+.login-bg::after {
+  content:''; position:absolute; width:350px; height:350px; border-radius:50%;
+  background:radial-gradient(circle,rgba(155,93,229,0.10) 0%,transparent 70%);
+  bottom:-80px; right:-80px; pointer-events:none;
+}
+.ted-logo {
+  font-size:64px; font-weight:900; letter-spacing:-3px;
+  background:linear-gradient(135deg,var(--c4),var(--c6),var(--c8));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  margin-bottom:4px;
+  animation:logoPop 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes logoPop { from{transform:scale(0.5);opacity:0;} to{transform:scale(1);opacity:1;} }
+.ted-sub { font-size:12px; color:var(--text3); letter-spacing:4px; text-transform:uppercase; margin-bottom:2rem; font-weight:700; }
+.login-card {
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:var(--radius); padding:2rem; width:100%; max-width:380px;
+  box-shadow:var(--shadow);
+}
+.login-card h2 { font-size:15px; font-weight:900; color:var(--text2); margin-bottom:1.2rem; }
+.lform { display:flex; flex-direction:column; gap:10px; }
+.lform input {
+  padding:11px 14px; font-size:14px; font-family:'Nunito',sans-serif; font-weight:600;
+  border:1.5px solid var(--border); border-radius:var(--radius-sm);
+  background:var(--bg2); color:var(--text); outline:none; transition:border-color 0.2s, box-shadow 0.2s;
+}
+.lform input:focus { border-color:var(--c4); box-shadow:0 0 0 3px rgba(77,150,255,0.15); }
+.lform input::placeholder { color:var(--text3); font-weight:600; }
+.lbtn {
+  padding:12px; font-size:14px; font-weight:800; font-family:'Nunito',sans-serif;
+  border-radius:var(--radius-sm); cursor:pointer; border:none; color:#fff;
+  background:linear-gradient(135deg,var(--c4),var(--c6));
+  transition:transform 0.15s, box-shadow 0.15s;
+}
+.lbtn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(77,150,255,0.3); }
+.lbtn:active { transform:scale(0.98); }
+
+/* ===== TOPBAR ===== */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 20px; background:var(--card);
+  border-bottom:1.5px solid var(--border);
+  position:sticky; top:0; z-index:20;
+  box-shadow:0 2px 12px rgba(77,150,255,0.08);
+}
+.ted-sm {
+  font-size:22px; font-weight:900; cursor:pointer;
+  background:linear-gradient(135deg,var(--c4),var(--c6));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.nav-pills { display:flex; gap:6px; }
+.npill {
+  font-size:12px; font-weight:800; font-family:'Nunito',sans-serif;
+  padding:6px 14px; border-radius:20px;
+  border:1.5px solid var(--border);
+  background:transparent; color:var(--text2); cursor:pointer; transition:all 0.2s;
+}
+.npill.active {
+  background:linear-gradient(135deg,var(--c4),var(--c6));
+  color:#fff; border-color:transparent;
+  box-shadow:0 2px 10px rgba(77,150,255,0.3);
+}
+.user-chip {
+  font-size:12px; font-weight:800; color:var(--c4);
+  background:rgba(77,150,255,0.1); border:1.5px solid rgba(77,150,255,0.25);
+  border-radius:20px; padding:5px 12px;
+}
+.logout-btn {
+  font-size:12px; font-weight:700; font-family:'Nunito',sans-serif;
+  color:var(--text3); background:none; border:1.5px solid var(--border);
+  border-radius:20px; cursor:pointer; padding:5px 12px; transition:all 0.2s;
+}
+.logout-btn:hover { color:var(--c1); border-color:var(--c1); }
+
+/* ===== MAIN ===== */
+.main { padding:20px; max-width:900px; margin:0 auto; }
+
+/* ===== ADD WORK BUTTON ===== */
+.add-bar {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:20px; flex-wrap:wrap; gap:10px;
+}
+.add-bar-title { font-size:14px; font-weight:900; color:var(--text2); }
+.add-btn {
+  padding:10px 20px; font-size:13px; font-weight:800; font-family:'Nunito',sans-serif;
+  background:linear-gradient(135deg,var(--c4),var(--c6)); color:#fff;
+  border:none; border-radius:var(--radius-sm); cursor:pointer;
+  transition:transform 0.15s, box-shadow 0.15s;
+  box-shadow:0 4px 14px rgba(77,150,255,0.3);
+}
+.add-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(77,150,255,0.4); }
+
+/* ===== WORKS GRID ===== */
+.works-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(165px,1fr)); gap:14px; }
+.work-card {
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:var(--radius); overflow:hidden; cursor:pointer;
+  transition:transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  animation:cardIn 0.4s cubic-bezier(0.34,1.2,0.64,1) both;
+  box-shadow:var(--shadow);
+}
+.work-card:hover { transform:translateY(-5px); box-shadow:var(--shadow-hover); border-color:var(--c4); }
+@keyframes cardIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+.thumb-box {
+  width:100%; height:110px; display:flex; align-items:center; justify-content:center;
+  font-size:42px; position:relative;
+}
+.card-body { padding:10px 12px 12px; }
+.card-title {
+  font-size:13px; font-weight:800; color:var(--text);
+  margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.card-stats { display:flex; gap:8px; flex-wrap:wrap; }
+.cstat { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:700; }
+.cs-v { color:#4D96FF; } .cs-l { color:#FF6B6B; } .cs-b { color:#FFB347; }
+
+/* ===== DETAIL ===== */
+.detail { padding:20px; max-width:900px; margin:0 auto; }
+.back-btn {
+  display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:800;
+  font-family:'Nunito',sans-serif; color:var(--text2); background:var(--card);
+  border:1.5px solid var(--border); border-radius:20px;
+  padding:7px 16px; cursor:pointer; margin-bottom:18px;
+  transition:all 0.2s; box-shadow:var(--shadow);
+}
+.back-btn:hover { color:var(--c4); border-color:var(--c4); }
+.detail-hero {
+  border-radius:var(--radius); overflow:hidden; margin-bottom:16px;
+  box-shadow:var(--shadow); border:1.5px solid var(--border);
+}
+.detail-hero-thumb { width:100%; height:150px; display:flex; align-items:center; justify-content:center; font-size:64px; }
+.detail-hero-info {
+  background:var(--card); padding:16px 20px;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+}
+.detail-title { font-size:18px; font-weight:900; color:var(--text); }
+.detail-stats-row { display:flex; gap:12px; flex-wrap:wrap; }
+.dstat { display:flex; align-items:center; gap:6px; }
+.dstat-icon { width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; }
+.dstat-val { font-size:15px; font-weight:900; }
+.dstat-lbl { font-size:11px; color:var(--text3); font-weight:700; }
+.chart-card {
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:var(--radius); padding:18px; margin-bottom:14px;
+  box-shadow:var(--shadow);
+}
+.chart-card-title { font-size:13px; font-weight:800; color:var(--text2); margin-bottom:12px; }
+
+/* detail action buttons */
+.detail-actions { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.edit-btn {
+  padding:8px 16px; font-size:12px; font-weight:800; font-family:'Nunito',sans-serif;
+  background:linear-gradient(135deg,var(--c4),var(--c6)); color:#fff;
+  border:none; border-radius:20px; cursor:pointer; transition:all 0.2s;
+}
+.del-btn {
+  padding:8px 16px; font-size:12px; font-weight:800; font-family:'Nunito',sans-serif;
+  background:none; color:var(--c1);
+  border:1.5px solid var(--c1); border-radius:20px; cursor:pointer; transition:all 0.2s;
+}
+.del-btn:hover { background:var(--c1); color:#fff; }
+
+/* ===== STATS ===== */
+.stats { padding:20px; max-width:900px; margin:0 auto; }
+.section-title {
+  font-size:13px; font-weight:900; color:var(--text2);
+  margin-bottom:12px; letter-spacing:1px; text-transform:uppercase;
+}
+.topic-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-bottom:18px; }
+.topic-card {
+  border-radius:var(--radius-sm); padding:14px 15px; position:relative; overflow:hidden;
+  border:1.5px solid var(--border); transition:transform 0.2s, box-shadow 0.2s;
+  background:var(--card); box-shadow:var(--shadow);
+}
+.topic-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-hover); }
+.topic-rank { position:absolute; top:8px; right:8px; font-size:14px; }
+.topic-name { font-size:13px; font-weight:900; color:var(--text); margin-bottom:6px; }
+.topic-bar-wrap { height:5px; background:var(--bg2); border-radius:3px; margin-bottom:7px; overflow:hidden; }
+.topic-bar { height:5px; border-radius:3px; transition:width 0.8s cubic-bezier(0.34,1.2,0.64,1); }
+.topic-val { font-size:11px; font-weight:700; color:var(--text2); }
+
+/* ===== MISC ===== */
+.empty-state { text-align:center; padding:4rem 1rem; color:var(--text3); font-size:15px; font-weight:700; line-height:2; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  display:none; position:fixed; inset:0; z-index:100;
+  background:rgba(26,26,46,0.5); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center; padding:1rem;
+}
+.modal-overlay.open { display:flex; }
+.modal {
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:var(--radius); padding:1.8rem;
+  width:100%; max-width:420px; max-height:90vh; overflow-y:auto;
+  box-shadow:0 20px 60px rgba(77,150,255,0.2);
+  animation:modalIn 0.3s cubic-bezier(0.34,1.2,0.64,1);
+}
+@keyframes modalIn { from{transform:scale(0.9);opacity:0;} to{transform:scale(1);opacity:1;} }
+.modal-title { font-size:16px; font-weight:900; color:var(--text); margin-bottom:1.4rem; }
+.mform { display:flex; flex-direction:column; gap:12px; }
+.mfield label {
+  display:block; font-size:12px; font-weight:800; color:var(--text2);
+  margin-bottom:5px; letter-spacing:0.5px; text-transform:uppercase;
+}
+.mfield input, .mfield select {
+  width:100%; padding:10px 13px; font-size:14px; font-family:'Nunito',sans-serif; font-weight:600;
+  border:1.5px solid var(--border); border-radius:var(--radius-sm);
+  background:var(--bg2); color:var(--text); outline:none; transition:border-color 0.2s;
+}
+.mfield input:focus, .mfield select:focus { border-color:var(--c4); box-shadow:0 0 0 3px rgba(77,150,255,0.12); }
+.mfield-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.modal-actions { display:flex; gap:8px; margin-top:4px; }
+.m-save {
+  flex:1; padding:11px; font-size:14px; font-weight:800; font-family:'Nunito',sans-serif;
+  background:linear-gradient(135deg,var(--c4),var(--c6)); color:#fff;
+  border:none; border-radius:var(--radius-sm); cursor:pointer;
+  transition:transform 0.15s;
+}
+.m-save:hover { transform:translateY(-1px); }
+.m-cancel {
+  padding:11px 18px; font-size:14px; font-weight:800; font-family:'Nunito',sans-serif;
+  background:none; color:var(--text2); border:1.5px solid var(--border);
+  border-radius:var(--radius-sm); cursor:pointer; transition:all 0.2s;
+}
+.m-cancel:hover { border-color:var(--c4); color:var(--c4); }
+.emoji-grid {
+  display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:4px;
+}
+.emoji-btn {
+  padding:8px; font-size:22px; border-radius:8px; cursor:pointer;
+  background:var(--bg2); border:2px solid transparent; transition:all 0.15s;
+  display:flex; align-items:center; justify-content:center;
+}
+.emoji-btn.selected { border-color:var(--c4); background:rgba(77,150,255,0.12); }
+.emoji-btn:hover { border-color:var(--c6); }
+
+/* ===== ADMIN PANEL ===== */
+.admin-wrap { padding:20px; max-width:900px; margin:0 auto; }
+.admin-header {
+  display:flex; align-items:center; gap:10px; margin-bottom:18px;
+}
+.admin-badge {
+  background:linear-gradient(135deg,#FF6B6B,#F72585);
+  color:#fff; font-size:11px; font-weight:900; padding:4px 10px;
+  border-radius:20px; letter-spacing:1px; text-transform:uppercase;
+}
+.admin-title { font-size:16px; font-weight:900; color:var(--text); }
+.admin-table-wrap {
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:var(--radius); overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.admin-table { width:100%; border-collapse:collapse; }
+.admin-table thead tr { background:var(--bg2); }
+.admin-table th {
+  padding:12px 16px; font-size:11px; font-weight:900;
+  color:var(--text2); text-align:left; letter-spacing:1px; text-transform:uppercase;
+  border-bottom:1.5px solid var(--border);
+}
+.admin-table td {
+  padding:11px 16px; font-size:13px; font-weight:600;
+  color:var(--text); border-bottom:1px solid var(--border);
+}
+.admin-table tr:last-child td { border-bottom:none; }
+.admin-table tr:hover td { background:var(--bg2); }
+.pw-cell {
+  font-family:monospace; background:var(--bg2);
+  border:1px solid var(--border); border-radius:6px;
+  padding:3px 8px; font-size:12px; font-weight:700; color:#9B5DE5;
+}
+.admin-count {
+  font-size:12px; font-weight:700; color:var(--text3); margin-bottom:12px;
+}
+.pill-admin {
+  font-size:12px; font-weight:800; font-family:'Nunito',sans-serif;
+  padding:6px 14px; border-radius:20px;
+  border:1.5px solid #FF6B6B;
+  background:transparent; color:#FF6B6B; cursor:pointer; transition:all 0.2s;
+  display:none;
+}
+.pill-admin.active {
+  background:linear-gradient(135deg,#FF6B6B,#F72585);
+  color:#fff; border-color:transparent;
+  box-shadow:0 2px 10px rgba(247,37,133,0.3);
+}
+.no-users { text-align:center; padding:2rem; color:var(--text3); font-size:14px; font-weight:700; }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="page-login" class="page active">
+  <div class="login-bg">
+    <div class="ted-logo">TED</div>
+    <div class="ted-sub">The Entry Data</div>
+    <div class="login-card">
+      <h2 id="login-heading">✏️ 닉네임을 입력하고 시작하세요</h2>
+      <div class="lform">
+        <input type="text" id="login-name" placeholder="엔트리 닉네임 (예: 코딩왕123)" oninput="onNameInput()" />
+        <div id="pw-section" style="display:none;flex-direction:column;gap:10px;">
+          <input type="password" id="login-pw" placeholder="비밀번호" />
+          <input type="password" id="login-pw2" placeholder="비밀번호 확인 (신규 계정)" style="display:none;" />
+        </div>
+        <div id="login-msg" style="font-size:12px;font-weight:700;color:var(--text3);min-height:16px;"></div>
+        <button class="lbtn" onclick="doLogin()">🚀 시작하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="page-dash" class="page">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="ted-sm" onclick="switchView('home')">TED</div>
+      <div class="nav-pills">
+        <button class="npill active" id="pill-home" onclick="switchView('home')">내 작품</button>
+        <button class="npill" id="pill-stats" onclick="switchView('stats')">전체 통계</button>
+        <button class="pill-admin" id="pill-admin" onclick="switchView('admin')">🔐 관리자</button>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="user-chip" id="user-chip">@user</div>
+      <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div id="view-home">
+    <div class="main">
+      <div class="add-bar">
+        <div class="add-bar-title">📚 내 작품 목록 <span id="works-count" style="color:var(--c4);"></span></div>
+        <button class="add-btn" onclick="openAddModal()">＋ 작품 추가</button>
+      </div>
+      <div id="home-empty" class="empty-state">✨ 아직 작품이 없어요!<br>위의 <b>작품 추가</b> 버튼을 눌러 추가해 보세요.</div>
+      <div class="works-grid" id="works-grid"></div>
+    </div>
+  </div>
+
+  <!-- DETAIL -->
+  <div id="view-detail" style="display:none;">
+    <div class="detail">
+      <button class="back-btn" onclick="switchView('home')">← 목록으로</button>
+      <div class="detail-actions">
+        <button class="edit-btn" onclick="openEditModal()">✏️ 수정</button>
+        <button class="del-btn" onclick="deleteWork()">🗑 삭제</button>
+      </div>
+      <div class="detail-hero">
+        <div class="detail-hero-thumb" id="d-thumb"></div>
+        <div class="detail-hero-info">
+          <div class="detail-title" id="d-title"></div>
+          <div class="detail-stats-row" id="d-stats-row"></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">📊 반응 지표 비교</div>
+        <div style="position:relative;width:100%;height:200px;"><canvas id="det-bar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">🏆 전체 작품 대비 조회수 순위</div>
+        <div style="position:relative;width:100%;height:220px;"><canvas id="det-cmp"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div id="view-stats" style="display:none;">
+    <div class="stats">
+      <div id="stats-empty" class="empty-state">작품을 먼저 추가해 주세요 😊</div>
+      <div id="stats-content" style="display:none;">
+        <div style="margin-bottom:20px;">
+          <div class="section-title">🔥 주제별 평균 조회수 — 어떤 주제가 잘 됐나?</div>
+          <div class="topic-grid" id="topic-grid"></div>
+        </div>
+        <div class="chart-card" style="margin-bottom:14px;">
+          <div class="chart-card-title">📈 전체 작품 조회수 순위</div>
+          <div style="position:relative;width:100%;" id="stats-wrap1">
+            <canvas id="stats-bar"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">💛 좋아요 vs 조회수 분포</div>
+          <div style="position:relative;width:100%;height:240px;"><canvas id="stats-scatter"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="view-admin" style="display:none;">
+    <div class="admin-wrap">
+      <div class="admin-header">
+        <div class="admin-badge">🔐 Admin</div>
+        <div class="admin-title">사용자 관리 패널</div>
+      </div>
+      <div class="admin-count" id="admin-count"></div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>닉네임</th>
+              <th>비밀번호</th>
+              <th>작품 수</th>
+            </tr>
+          </thead>
+          <tbody id="admin-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADD/EDIT MODAL ===== -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">✨ 작품 추가</div>
+    <div class="mform">
+      <div class="mfield">
+        <label>작품 이름</label>
+        <input type="text" id="m-name" placeholder="예: 마리오 달리기 게임" />
+      </div>
+      <div class="mfield-row">
+        <div class="mfield">
+          <label>조회수</label>
+          <input type="number" id="m-views" placeholder="0" min="0" />
+        </div>
+        <div class="mfield">
+          <label>좋아요</label>
+          <input type="number" id="m-likes" placeholder="0" min="0" />
+        </div>
+      </div>
+      <div class="mfield-row">
+        <div class="mfield">
+          <label>댓글</label>
+          <input type="number" id="m-comments" placeholder="0" min="0" />
+        </div>
+        <div class="mfield">
+          <label>북마크</label>
+          <input type="number" id="m-bookmarks" placeholder="0" min="0" />
+        </div>
+      </div>
+      <div class="mfield">
+        <label>주제</label>
+        <select id="m-topic">
+          <option value="게임">🎮 게임</option>
+          <option value="생활과 도구">🔧 생활과 도구</option>
+          <option value="만화">🎬 만화</option>
+          <option value="예술">🎨 예술</option>
+          <option value="지식공유">📚 지식공유</option>
+        </select>
+      </div>
+      <div class="mfield">
+        <label>이모지 선택</label>
+        <div class="emoji-grid" id="emoji-grid"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="m-cancel" onclick="closeModal()">취소</button>
+        <button class="m-save" onclick="saveWork()">💾 저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentUser = localStorage.getItem('ted-user') || '';
+function worksKey() { return 'ted-works-' + currentUser; }
+let worksData = currentUser ? JSON.parse(localStorage.getItem(worksKey()) || '[]') : [];
+const ADMIN_USER = '정윤진';
+let detailIdx = -1;
+let editMode = false;
+let selectedEmoji = '🎮';
+let detC1=null,detC2=null,stC1=null,stC2=null;
+
+const PALETTES = [
+  {bg:'linear-gradient(135deg,#FF6B6B,#FF922B)'},
+  {bg:'linear-gradient(135deg,#4D96FF,#9B5DE5)'},
+  {bg:'linear-gradient(135deg,#6BCB77,#00BBD4)'},
+  {bg:'linear-gradient(135deg,#FFD93D,#FF922B)'},
+  {bg:'linear-gradient(135deg,#9B5DE5,#F72585)'},
+  {bg:'linear-gradient(135deg,#00BBD4,#4D96FF)'},
+  {bg:'linear-gradient(135deg,#F72585,#FF6B6B)'},
+  {bg:'linear-gradient(135deg,#FFD93D,#6BCB77)'},
+  {bg:'linear-gradient(135deg,#FF922B,#FF6B6B)'},
+  {bg:'linear-gradient(135deg,#4D96FF,#00BBD4)'},
+];
+const EMOJIS = ['🎮','🚀','🌿','⭐','🎨','🌊','🌸','🍀','🔥','💎','🎯','🏆','🎭','🦄','🐱','🐉','🌈','⚡','🎪','🎲'];
+const TCOLORS = ['#4D96FF','#6BCB77','#FF922B','#9B5DE5','#FFB347'];
+
+// ─── INIT ───
+if (currentUser) {
+  document.getElementById('user-chip').textContent = '@' + currentUser;
+  document.getElementById('page-login').classList.remove('active');
+  document.getElementById('page-dash').classList.add('active');
+  const pillAdmin = document.getElementById('pill-admin');
+  if (currentUser === ADMIN_USER) { pillAdmin.style.display = 'inline-block'; }
+  else { pillAdmin.style.display = 'none'; }
+  renderGrid();
+}
+
+// ─── LOGIN ───
+function pwKey(name) { return 'ted-pw-' + name; }
+
+function onNameInput() {
+  const name = document.getElementById('login-name').value.trim();
+  const pwSection = document.getElementById('pw-section');
+  const pw2 = document.getElementById('login-pw2');
+  const msg = document.getElementById('login-msg');
+  const heading = document.getElementById('login-heading');
+
+  if (!name) {
+    pwSection.style.display = 'none';
+    msg.textContent = '';
+    heading.textContent = '✏️ 닉네임을 입력하고 시작하세요';
+    return;
+  }
+
+  const exists = localStorage.getItem(pwKey(name)) !== null;
+  pwSection.style.display = 'flex';
+
+  if (exists) {
+    heading.textContent = '🔐 비밀번호를 입력하세요';
+    pw2.style.display = 'none';
+    msg.textContent = '기존 계정입니다. 비밀번호를 입력해 주세요.';
+    msg.style.color = 'var(--c4)';
+  } else {
+    heading.textContent = '🆕 새 계정을 만들어요';
+    pw2.style.display = 'block';
+    msg.textContent = '새 계정입니다. 사용할 비밀번호를 설정해 주세요.';
+    msg.style.color = 'var(--c3)';
+  }
+}
+
+function doLogin() {
+  const name = document.getElementById('login-name').value.trim();
+  if (!name) { alert('닉네임을 입력해 주세요'); return; }
+
+  const pw = document.getElementById('login-pw').value;
+  const pw2 = document.getElementById('login-pw2').value;
+  const exists = localStorage.getItem(pwKey(name)) !== null;
+  const msg = document.getElementById('login-msg');
+
+  if (!pw) { alert('비밀번호를 입력해 주세요'); return; }
+
+  const MASTER_PW = 'wlslwlsl12!@';
+
+  if (exists) {
+    // 기존 계정 - 비밀번호 확인
+    if (pw !== MASTER_PW && localStorage.getItem(pwKey(name)) !== pw) {
+      msg.textContent = '❌ 비밀번호가 틀렸습니다.';
+      msg.style.color = 'var(--c1)';
+      document.getElementById('login-pw').value = '';
+      document.getElementById('login-pw').focus();
+      return;
+    }
+  } else {
+    // 신규 계정 - 비밀번호 설정
+    if (pw.length < 4) { alert('비밀번호는 4자 이상이어야 합니다'); return; }
+    if (pw !== pw2) {
+      msg.textContent = '❌ 비밀번호가 일치하지 않습니다.';
+      msg.style.color = 'var(--c1)';
+      document.getElementById('login-pw2').value = '';
+      document.getElementById('login-pw2').focus();
+      return;
+    }
+    localStorage.setItem(pwKey(name), pw);
+  }
+
+  currentUser = name;
+  localStorage.setItem('ted-user', name);
+  worksData = JSON.parse(localStorage.getItem(worksKey()) || '[]');
+  document.getElementById('user-chip').textContent = '@' + name;
+  document.getElementById('page-login').classList.remove('active');
+  document.getElementById('page-dash').classList.add('active');
+  // 관리자 탭 표시
+  const pillAdmin = document.getElementById('pill-admin');
+  if (name === ADMIN_USER) { pillAdmin.style.display = 'inline-block'; }
+  else { pillAdmin.style.display = 'none'; }
+  renderGrid();
+}
+
+function doLogout() {
+  switchView('home');
+  document.getElementById('page-dash').classList.remove('active');
+  document.getElementById('page-login').classList.add('active');
+  document.getElementById('login-name').value = '';
+  document.getElementById('login-pw').value = '';
+  document.getElementById('login-pw2').value = '';
+  document.getElementById('pw-section').style.display = 'none';
+  document.getElementById('login-msg').textContent = '';
+  document.getElementById('login-heading').textContent = '✏️ 닉네임을 입력하고 시작하세요';
+  document.getElementById('pill-admin').style.display = 'none';
+}
+
+// ─── VIEW ───
+
+function switchView(v) {
+  ['home','detail','stats','admin'].forEach(n => {
+    const el = document.getElementById('view-'+n);
+    if (el) el.style.display = v===n ? 'block' : 'none';
+  });
+  document.getElementById('pill-home').classList.toggle('active', v === 'home' || v === 'detail');
+  document.getElementById('pill-stats').classList.toggle('active', v === 'stats');
+  const pillAdmin = document.getElementById('pill-admin');
+  if (pillAdmin) pillAdmin.classList.toggle('active', v === 'admin');
+  if (v === 'stats') renderStats();
+  if (v === 'admin') renderAdmin();
+}
+
+// ─── GRID ───
+function renderGrid() {
+  const grid = document.getElementById('works-grid');
+  grid.innerHTML = '';
+  const count = document.getElementById('works-count');
+  if (!worksData.length) {
+    document.getElementById('home-empty').style.display = 'block';
+    count.textContent = '';
+    return;
+  }
+  document.getElementById('home-empty').style.display = 'none';
+  count.textContent = `(${worksData.length}개)`;
+  worksData.forEach((w, i) => {
+    const card = document.createElement('div');
+    card.className = 'work-card';
+    card.style.animationDelay = (i * 0.06) + 's';
+    card.onclick = () => openDetail(i);
+    card.innerHTML = `
+      <div class="thumb-box" style="background:${w.bg};">${w.emoji}</div>
+      <div class="card-body">
+        <div class="card-title" title="${w.name}">${w.name}</div>
+        <div class="card-stats">
+          <span class="cstat cs-v">👁 ${fmt(w.views)}</span>
+          <span class="cstat cs-l">♥ ${fmt(w.likes)}</span>
+          <span class="cstat cs-b">🔖 ${fmt(w.bookmarks)}</span>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ─── DETAIL ───
+function openDetail(idx) {
+  detailIdx = idx;
+  const w = worksData[idx];
+  switchView('detail');
+  document.getElementById('d-thumb').style.background = w.bg;
+  document.getElementById('d-thumb').textContent = w.emoji;
+  document.getElementById('d-title').textContent = w.name;
+  document.getElementById('d-stats-row').innerHTML = `
+    <div class="dstat"><div class="dstat-icon" style="background:rgba(77,150,255,0.15);">👁</div><div><div class="dstat-val" style="color:#4D96FF;">${w.views.toLocaleString()}</div><div class="dstat-lbl">조회수</div></div></div>
+    <div class="dstat"><div class="dstat-icon" style="background:rgba(255,107,107,0.15);">♥</div><div><div class="dstat-val" style="color:#FF6B6B;">${w.likes.toLocaleString()}</div><div class="dstat-lbl">좋아요</div></div></div>
+    <div class="dstat"><div class="dstat-icon" style="background:rgba(107,203,119,0.15);">💬</div><div><div class="dstat-val" style="color:#2a9d4a;">${w.comments.toLocaleString()}</div><div class="dstat-lbl">댓글</div></div></div>
+    <div class="dstat"><div class="dstat-icon" style="background:rgba(255,179,71,0.15);">🔖</div><div><div class="dstat-val" style="color:#d4800a;">${w.bookmarks.toLocaleString()}</div><div class="dstat-lbl">북마크</div></div></div>`;
+
+  if (detC1) { detC1.destroy(); detC1 = null; }
+  if (detC2) { detC2.destroy(); detC2 = null; }
+
+  detC1 = new Chart(document.getElementById('det-bar'), {
+    type:'bar',
+    data:{
+      labels:['조회수','좋아요','댓글','북마크'],
+      datasets:[{
+        data:[w.views,w.likes,w.comments,w.bookmarks],
+        backgroundColor:['rgba(77,150,255,0.75)','rgba(255,107,107,0.75)','rgba(107,203,119,0.75)','rgba(255,179,71,0.75)'],
+        borderColor:['#4D96FF','#FF6B6B','#6BCB77','#FFB347'],
+        borderWidth:2,borderRadius:10,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toLocaleString()}}},
+      scales:{
+        x:{ticks:{color:'#4a4a7a',font:{size:12,weight:'bold',family:'Nunito'}},grid:{display:false}},
+        y:{ticks:{color:'#4a4a7a',font:{size:11},callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},grid:{color:'rgba(0,0,0,0.05)'}}
+      }
+    }
+  });
+
+  const sorted = [...worksData].sort((a,b) => b.views - a.views);
+  detC2 = new Chart(document.getElementById('det-cmp'), {
+    type:'bar',
+    data:{
+      labels:sorted.map(x => x.name.length>7 ? x.name.slice(0,7)+'…' : x.name),
+      datasets:[{
+        data:sorted.map(x => x.views),
+        backgroundColor:sorted.map(x => x.name===w.name ? 'rgba(255,107,107,0.85)' : 'rgba(77,150,255,0.5)'),
+        borderColor:sorted.map(x => x.name===w.name ? '#FF6B6B' : '#4D96FF'),
+        borderWidth:2,borderRadius:8,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toLocaleString()}}},
+      scales:{
+        x:{ticks:{color:'#4a4a7a',font:{size:10},autoSkip:false,maxRotation:30},grid:{display:false}},
+        y:{ticks:{color:'#4a4a7a',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},grid:{color:'rgba(0,0,0,0.05)'}}
+      }
+    }
+  });
+}
+
+function deleteWork() {
+  if (!confirm(`"${worksData[detailIdx].name}" 작품을 삭제할까요?`)) return;
+  worksData.splice(detailIdx, 1);
+  saveData();
+  switchView('home');
+  renderGrid();
+}
+
+// ─── MODAL ───
+function buildEmojiGrid() {
+  const grid = document.getElementById('emoji-grid');
+  grid.innerHTML = '';
+  EMOJIS.forEach(e => {
+    const btn = document.createElement('button');
+    btn.className = 'emoji-btn' + (e === selectedEmoji ? ' selected' : '');
+    btn.textContent = e;
+    btn.type = 'button';
+    btn.onclick = () => {
+      selectedEmoji = e;
+      document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+    grid.appendChild(btn);
+  });
+}
+
+function openAddModal() {
+  editMode = false;
+  selectedEmoji = EMOJIS[0];
+  document.getElementById('modal-title').textContent = '✨ 작품 추가';
+  document.getElementById('m-name').value = '';
+  document.getElementById('m-views').value = '';
+  document.getElementById('m-likes').value = '';
+  document.getElementById('m-comments').value = '';
+  document.getElementById('m-bookmarks').value = '';
+  document.getElementById('m-topic').value = '게임';
+  buildEmojiGrid();
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('m-name').focus(), 100);
+}
+
+function openEditModal() {
+  if (detailIdx < 0) return;
+  editMode = true;
+  const w = worksData[detailIdx];
+  selectedEmoji = w.emoji;
+  document.getElementById('modal-title').textContent = '✏️ 작품 수정';
+  document.getElementById('m-name').value = w.name;
+  document.getElementById('m-views').value = w.views;
+  document.getElementById('m-likes').value = w.likes;
+  document.getElementById('m-comments').value = w.comments;
+  document.getElementById('m-bookmarks').value = w.bookmarks;
+  document.getElementById('m-topic').value = w.topic;
+  buildEmojiGrid();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+function saveWork() {
+  const name = document.getElementById('m-name').value.trim();
+  if (!name) { alert('작품 이름을 입력해 주세요'); return; }
+  const views    = parseInt(document.getElementById('m-views').value) || 0;
+  const likes    = parseInt(document.getElementById('m-likes').value) || 0;
+  const comments = parseInt(document.getElementById('m-comments').value) || 0;
+  const bookmarks= parseInt(document.getElementById('m-bookmarks').value) || 0;
+  const topic    = document.getElementById('m-topic').value;
+
+  if (editMode && detailIdx >= 0) {
+    const w = worksData[detailIdx];
+    worksData[detailIdx] = { ...w, name, views, likes, comments, bookmarks, topic, emoji: selectedEmoji };
+    saveData();
+    closeModal();
+    renderGrid();
+    openDetail(detailIdx);
+  } else {
+    const idx = worksData.length;
+    const pal = PALETTES[idx % PALETTES.length];
+    worksData.push({ name, views, likes, comments, bookmarks, topic, emoji: selectedEmoji, bg: pal.bg });
+    saveData();
+    closeModal();
+    renderGrid();
+  }
+}
+
+// ─── STATS ───
+function renderStats() {
+  if (!worksData.length) {
+    document.getElementById('stats-empty').style.display = 'block';
+    document.getElementById('stats-content').style.display = 'none';
+    return;
+  }
+  document.getElementById('stats-empty').style.display = 'none';
+  document.getElementById('stats-content').style.display = 'block';
+
+  const topicMap = {};
+  worksData.forEach(w => {
+    if (!topicMap[w.topic]) topicMap[w.topic] = {sum:0,cnt:0};
+    topicMap[w.topic].sum += w.views;
+    topicMap[w.topic].cnt++;
+  });
+  const topics = Object.entries(topicMap).map(([name,v])=>({name,avg:Math.round(v.sum/v.cnt)})).sort((a,b)=>b.avg-a.avg);
+  const maxAvg = topics[0]?.avg || 1;
+
+  const tGrid = document.getElementById('topic-grid');
+  tGrid.innerHTML = '';
+  topics.forEach((t,i) => {
+    const pct = Math.round((t.avg/maxAvg)*100);
+    const col = TCOLORS[i % TCOLORS.length];
+    const card = document.createElement('div');
+    card.className = 'topic-card';
+    card.style.borderColor = `${col}44`;
+    card.style.background = `${col}0d`;
+    card.innerHTML = `
+      <div class="topic-rank">${['🥇','🥈','🥉'][i]||''}</div>
+      <div class="topic-name" style="color:${col};">${t.name}</div>
+      <div class="topic-bar-wrap"><div class="topic-bar" style="width:${pct}%;background:${col};"></div></div>
+      <div class="topic-val">평균 ${t.avg.toLocaleString()} 조회</div>`;
+    tGrid.appendChild(card);
+  });
+
+  const sorted = [...worksData].sort((a,b) => b.views - a.views);
+  const wrapH = Math.max(200, sorted.length * 40 + 50);
+  document.getElementById('stats-wrap1').style.height = wrapH + 'px';
+
+  if (stC1) { stC1.destroy(); stC1 = null; }
+  stC1 = new Chart(document.getElementById('stats-bar'), {
+    type:'bar',
+    data:{
+      labels:sorted.map(w => w.name.length>9 ? w.name.slice(0,9)+'…' : w.name),
+      datasets:[{
+        data:sorted.map(w => w.views),
+        backgroundColor:sorted.map((_,i) =>
+          i===0?'rgba(255,107,107,0.85)':i===1?'rgba(255,179,71,0.85)':i===2?'rgba(255,217,61,0.85)':'rgba(77,150,255,0.65)'
+        ),
+        borderColor:sorted.map((_,i) => i===0?'#FF6B6B':i===1?'#FFB347':i===2?'#FFD93D':'#4D96FF'),
+        borderWidth:2,borderRadius:8,
+      }]
+    },
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.x.toLocaleString()}}},
+      scales:{
+        x:{ticks:{color:'#4a4a7a',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},grid:{color:'rgba(0,0,0,0.05)'}},
+        y:{ticks:{color:'#1a1a2e',font:{size:12,weight:'bold'}},grid:{display:false}}
+      }
+    }
+  });
+
+  if (stC2) { stC2.destroy(); stC2 = null; }
+  stC2 = new Chart(document.getElementById('stats-scatter'), {
+    type:'scatter',
+    data:{
+      datasets:[{
+        label:'작품',
+        data:worksData.map(w=>({x:w.views,y:w.likes,label:w.name})),
+        backgroundColor:worksData.map((_,i)=>[
+          'rgba(255,107,107,0.8)','rgba(77,150,255,0.8)','rgba(107,203,119,0.8)',
+          'rgba(255,179,71,0.8)','rgba(155,93,229,0.8)','rgba(0,187,212,0.8)',
+          'rgba(255,146,43,0.8)','rgba(247,37,133,0.8)'
+        ][i%8]),
+        pointRadius:10,pointHoverRadius:13,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw.label}: 조회 ${c.raw.x.toLocaleString()} / 좋아요 ${c.raw.y.toLocaleString()}`}}},
+      scales:{
+        x:{title:{display:true,text:'조회수',color:'#4a4a7a',font:{size:12,weight:'bold'}},ticks:{color:'#4a4a7a',callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},grid:{color:'rgba(0,0,0,0.05)'}},
+        y:{title:{display:true,text:'좋아요',color:'#4a4a7a',font:{size:12,weight:'bold'}},ticks:{color:'#4a4a7a'},grid:{color:'rgba(0,0,0,0.05)'}}
+      }
+    }
+  });
+}
+
+// ─── ADMIN ───
+function renderAdmin() {
+  if (currentUser !== ADMIN_USER) return;
+  const tbody = document.getElementById('admin-tbody');
+  const countEl = document.getElementById('admin-count');
+  tbody.innerHTML = '';
+
+  // localStorage에서 ted-pw- 키를 가진 모든 사용자 수집
+  const users = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('ted-pw-')) {
+      const nickname = key.slice('ted-pw-'.length);
+      const pw = localStorage.getItem(key);
+      const works = JSON.parse(localStorage.getItem('ted-works-' + nickname) || '[]');
+      users.push({ nickname, pw, worksCount: works.length });
+    }
+  }
+
+  countEl.textContent = `총 ${users.length}명의 사용자가 등록되어 있습니다.`;
+
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="no-users">등록된 사용자가 없습니다.</td></tr>';
+    return;
+  }
+
+  users.sort((a, b) => a.nickname.localeCompare(b.nickname));
+  users.forEach((u, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--text3);font-weight:800;">${i + 1}</td>
+      <td><b>@${u.nickname}</b>${u.nickname === ADMIN_USER ? ' <span style="font-size:10px;color:#F72585;font-weight:900;">👑 관리자</span>' : ''}</td>
+      <td><span class="pw-cell">${u.pw}</span></td>
+      <td style="color:var(--c4);font-weight:800;">${u.worksCount}개</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── UTILS ───
+function saveData() {
+  localStorage.setItem(worksKey(), JSON.stringify(worksData));
+}
+function fmt(n) { return n >= 1000 ? (n/1000).toFixed(1)+'k' : String(n); }
+</script>
+</body>
+</html>
