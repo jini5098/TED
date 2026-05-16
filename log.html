@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOG - 여행 영어 학습 프로그램</title>
+    <style>
+        :root {
+            --main-blue: #00d2ff;
+            --deep-blue: #3a7bd5;
+            --bg-light: #eef9fd;
+            --sidebar-bg: #ffffff;
+        }
+
+        body { font-family: 'Pretendard', sans-serif; background: var(--bg-light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- 사이드바 --- */
+        #sidebar { width: 340px; background: var(--sidebar-bg); border-right: 2px solid #e1ecf0; display: none; flex-direction: column; overflow-y: auto; box-shadow: 4px 0 15px rgba(0,0,0,0.02); }
+        .side-header { padding: 25px; font-weight: 900; color: var(--deep-blue); font-size: 1.8rem; text-align: center; border-bottom: 1px solid #f0f6f8; }
+        
+        .notice-box { margin: 15px; padding: 15px; background: #fffde7; border-radius: 12px; border-left: 5px solid #fbc02d; font-size: 0.9rem; line-height: 1.6; color: #444; }
+
+        .category-section { padding: 0 15px; margin-bottom: 15px; }
+        .category-title { font-size: 0.85rem; font-weight: bold; color: #888; margin: 10px 5px; }
+        .category-btn { width: 100%; padding: 12px 15px; margin-bottom: 6px; background: #f5f8fa; border: 1px solid #eaf0f2; border-radius: 10px; text-align: left; font-size: 0.95rem; font-weight: bold; color: #333; cursor: pointer; transition: 0.2s; }
+        .category-btn:hover { background: #eefaff; color: var(--deep-blue); }
+        .category-btn.active { background: var(--deep-blue); color: white; border-color: var(--deep-blue); color: white; }
+
+        .side-tool { padding: 15px; background: #f0fbff; margin: 15px; border-radius: 15px; border: 1px solid #e1f5fe; }
+        #word-input { width: 100%; padding: 12px; border: 2px solid var(--main-blue); border-radius: 10px; box-sizing: border-box; font-size: 0.95rem; outline: none; }
+        #suggestion-box { margin-top: 5px; background: white; border-radius: 10px; border: 1px solid #ddd; max-height: 150px; overflow-y: auto; display: none; }
+        .suggest-item { padding: 10px 12px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; }
+        #search-result { margin-top: 10px; font-weight: bold; color: var(--deep-blue); text-align: center; }
+
+        /* --- 메인 화면 (스크롤 락 고정 공간) --- */
+        #main-content { flex: 1; display: flex; flex-direction: column; position: relative; background: #f8fbfc; height: 100vh; min-height: 0; }
+        #chat-page { flex: 1; display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; }
+        
+        /* [스크롤 버그 수정] 박스 크기를 화면 안에 가두고 스크롤바 강제 활성화 */
+        #chat-display { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 30px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            min-height: 0;
+        }
+        
+        #chat-display::-webkit-scrollbar { width: 8px; }
+        #chat-display::-webkit-scrollbar-track { background: transparent; }
+        #chat-display::-webkit-scrollbar-thumb { background: #cceeff; border-radius: 10px; }
+
+        .msg-group { display: flex; flex-direction: column; max-width: 80%; }
+        .msg-group.ai { align-self: flex-start; }
+        .msg-group.user { align-self: flex-end; }
+
+        .bubble-container { background: white; padding: 15px 20px; border-radius: 20px; border: 1px solid #e6ecef; box-shadow: 0 2px 6px rgba(0,0,0,0.02); line-height: 1.5; font-size: 1.05rem; }
+        .user .bubble-container { background: var(--main-blue); color: white; border: none; }
+
+        .grammar-feedback-box { background: #fff9db; border: 1px solid #fab005; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; font-size: 0.85rem; color: #664d03; line-height: 1.4; }
+
+        .translate-btn { display: inline-block; margin-top: 8px; font-size: 0.8rem; color: var(--deep-blue); background: #eefaff; border: 1px solid #bceaff; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; outline: none; }
+        .translation-text { font-size: 0.9rem; color: #555; margin-top: 8px; padding: 10px; background: #f9fbfb; border-radius: 8px; display: none; border-left: 4px solid var(--main-blue); }
+
+        #input-area { padding: 20px 30px; background: white; border-top: 1px solid #ebf1f3; display: flex; gap: 12px; }
+        #msg-input { flex: 1; padding: 15px 25px; border: 2px solid #e1e8eb; border-radius: 30px; font-size: 1rem; outline: none; }
+        #send-btn { background: var(--deep-blue); color: white; border: none; padding: 0 35px; border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+
+        /* 로그인창 */
+        #auth-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, var(--main-blue), var(--deep-blue)); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        #auth-overlay.hidden { display: none !important; }
+        .auth-box { width: 320px; background: white; padding: 40px; border-radius: 30px; text-align: center; }
+        .auth-box h1 { font-size: 3.5rem; color: var(--deep-blue); margin: 0 0 20px 0; font-weight: 900; }
+        .auth-box input { width: 85%; padding: 14px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #eee; font-size: 1.1rem; outline: none; text-align: center; }
+        .btn-login { width: 85%; padding: 14px; background: var(--deep-blue); color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-overlay">
+        <div class="auth-box">
+            <h1>LOG</h1>
+            <input type="text" id="user-id" placeholder="이름을 입력하세요">
+            <button class="btn-login" onclick="app.auth()">START</button>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <div class="side-header">LOG</div>
+        
+        <div class="notice-box">
+            <b>[시스템 업데이트]</b><br>
+            • 무한 스크롤 버그가 완벽히 해결되었습니다.<br>
+            • 메시지가 많아져도 화면이 깨지지 않습니다.<br>
+            • 문법 교정 엔진이 실시간 가동 중입니다.
+        </div>
+
+        <div class="category-section">
+            <div class="category-title">📍 상황 선택</div>
+            <button class="category-btn active" onclick="app.changeScenario('airport', this)">✈️ 공항 (입국심사~수하물)</button>
+            <button class="category-btn" onclick="app.changeScenario('hotel', this)">🏨 호텔 (체크인~요청사항)</button>
+            <button class="category-btn" onclick="app.changeScenario('restaurant', this)">🍔 식당 (추천~계산)</button>
+            <button class="category-btn" onclick="app.changeScenario('shopping', this)">🛍️ 쇼핑 (할인~환불)</button>
+            <button class="category-btn" onclick="app.changeScenario('sightseeing', this)">🌴 관광 (길찾기~고래상어)</button>
+        </div>
+
+        <div class="side-tool">
+            <h4>📖 마스터 여행 사전</h4>
+            <input type="text" id="word-input" placeholder="한글 단어 검색..." oninput="app.suggestWords()">
+            <div id="suggestion-box"></div>
+            <div id="search-result"></div>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div id="chat-page">
+            <div id="chat-display"></div>
+            <div id="input-area">
+                <input type="text" id="msg-input" placeholder="영어로 대답을 입력해 보세요...">
+                <button id="send-btn" onclick="app.send()">보내기</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const wordDict = {
+        "여권": "Passport", "공항": "Airport", "비행기": "Airplane", "수하물": "Baggage", "입국": "Arrival", "여정": "Itinerary",
+        "체크인": "Check-in", "수건": "Towel", "조식": "Breakfast", "예약": "Reservation", "에어컨": "Air-con",
+        "메뉴": "Menu", "추천": "Recommend", "계산": "Check/Bill", "영수증": "Receipt", "물": "Water",
+        "가격": "Price", "할인": "Discount", "비싸요": "Expensive", "환불": "Refund", "사이즈": "Size",
+        "지도": "Map", "바다": "Sea", "고래상어": "Whale shark", "사진": "Photo", "화장실": "Bathroom", "낚시": "Fishing"
+    };
+
+    const scenarioBrain = {
+        current: "airport",
+        step: 0,
+
+        airport: {
+            flow: [
+                { en: "Next, please. Passport and boarding pass, please?", ko: "다음 분, 여권과 탑승권 좀 주시겠어요?" },
+                { en: "Thank you. What's the main purpose of your visit?", ko: "감사합니다. 방문 목적이 무엇인가요?" },
+                { en: "Vacation? That's nice. How many days will you stay?", ko: "휴가요? 좋네요. 며칠 동안 머무실 예정인가요?" },
+                { en: "Where is your final destination in Bohol?", ko: "보홀에서 최종 목적지는 어디인가요?" },
+                { en: "Do you have any items to declare? Like food or cash?", ko: "신고할 물품이 있나요? 음식물이나 현금 같은 것요." },
+                { en: "Okay. Please look at the camera for the photo.", ko: "알겠습니다. 사진 촬영을 위해 카메라를 봐주세요." },
+                { en: "Registration complete. Please pick up your bags at belt number 7.", ko: "등록이 완료되었습니다. 7번 벨트에서 짐을 찾으세요." },
+                { en: "Wait! Is this your bag? It looks very heavy.", ko: "잠시만요! 이게 고객님 가방인가요? 아주 무거워 보이네요." },
+                { en: "Did you enjoy your flight to Philippines?", ko: "필리핀까지 오는 비행은 즐거우셨나요?" },
+                { en: "Great. Welcome to the Philippines! Enjoy your trip.", ko: "좋습니다. 필리핀에 오신 걸 환영해요! 즐거운 여행 되세요." }
+            ]
+        },
+        hotel: {
+            flow: [
+                { en: "Welcome to LOG Hotel. Can I help you with check-in?", ko: "LOG 호텔에 오신 걸 환영합니다. 체크인을 도와드릴까요?" },
+                { en: "May I have your name and reservation number?", ko: "성함과 예약 번호를 말씀해 주시겠어요?" },
+                { en: "Thank you. You booked a Deluxe Sea View room, right?", ko: "감사합니다. 디럭스 씨뷰 룸으로 예약하셨죠?" },
+                { en: "The room is not ready yet. Can you wait for 30 minutes?", ko: "아직 방이 준비되지 않았습니다. 30분 정도 기다려 주시겠어요?" },
+                { en: "In the meantime, would you like to have some welcome drinks?", ko: "기다리시는 동안 웰컴 드링크 한 잔 하시겠어요?" },
+                { en: "Your room is now ready! Here is your key card.", ko: "방이 이제 준비되었습니다! 여기 카드 키입니다." },
+                { en: "Do you need any extra pillows or towels for your room?", ko: "방에 추가 베개나 수건이 더 필요하신가요?" },
+                { en: "Sure. Anything else? Like a tour information?", ko: "네. 다른 건요? 투어 정보 같은 거 필요하신가요?" },
+                { en: "I'll arrange it for you. Have a pleasant stay!", ko: "준비해 드릴게요. 편안하게 머무세요!" }
+            ]
+        },
+        restaurant: {
+            flow: [
+                { en: "Hello! Welcome to the restaurant. Are you ready to order?", ko: "안녕하세요! 식당에 오신 것을 환영합니다. 주문하시겠어요?" },
+                { en: "Our Grilled Pork is very famous. Want to try it?", ko: "저희 가게 돼지고기 구이가 유명한데, 드셔보시겠어요?" },
+                { en: "Good. How would you like your steak? Medium or well-done?", ko: "좋습니다. 스테이크 굽기는 어떻게 해드릴까요?" },
+                { en: "Would you like something to drink? Mango shake is best!", ko: "음료는요? 망고 셰이크가 최고예요!" },
+                { en: "Is everything okay with your meal? Is it tasty?", ko: "음식은 괜찮으신가요? 맛있나요?" },
+                { en: "Would you like some dessert? We have special ice cream.", ko: "후식 드시겠어요? 특별한 아이스크림이 있습니다." },
+                { en: "Okay. Will you pay with a credit card or cash?", ko: "알겠습니다. 카드로 하실래요, 현금으로 하실래요?" },
+                { en: "Thank you for visiting! Have a great evening.", ko: "방문해 주셔서 감사합니다! 즐거운 저녁 되세요." }
+            ]
+        },
+        shopping: {
+            flow: [
+                { en: "Hi! Can I help you find something?", ko: "안녕하세요! 뭐 찾는 거 도와드릴까요?" },
+                { en: "This shirt is 20% off today. Do you like it?", ko: "이 셔츠는 오늘 20% 할인입니다. 마음에 드시나요?" },
+                { en: "What size do you need?", ko: "어떤 사이즈가 필요하신가요?" },
+                { en: "Here is your item. Do you need a receipt?", ko: "여기 있습니다. 영수증이 필요하신가요?" }
+            ]
+        },
+        sightseeing: {
+            flow: [
+                { en: "Ready for the tour? Let's go see the whale sharks!", ko: "투어 준비되셨나요? 고래상어 보러 갑시다!" },
+                { en: "Wow, look over there! Do you see the shark?", ko: "와, 저기 보세요! 상어가 보이시나요?" },
+                { en: "It's safe, don't worry. Do you want to swim now?", ko: "안전하니 걱정 마세요. 지금 수영하고 싶으신가요?" },
+                { en: "Say cheese! I will take a picture for you.", ko: "치즈 하세요! 사진 찍어드릴게요." }
+            ]
+        }
+    };
+
+    function checkGrammar(text) {
+        let clean = text.trim();
+        if(!clean || !/^[a-zA-Z]/.test(clean)) return "<span style='color:#666;'>💡 영어로 말하면 피드백이 나타나!</span>";
+        
+        let errors = [];
+        if(clean[0] !== clean[0].toUpperCase()) errors.push("• 첫 글자는 대문자로 시작해줘!");
+        if(!/[.!?]$/.test(clean)) errors.push("• 문장 끝에 마침표나 물음표를 찍어줘!");
+        
+        let lower = clean.toLowerCase();
+        if(lower.includes("i is")) errors.push("• 'I am'이 맞는 표현이야.");
+        if(lower.includes("he have")) errors.push("• 'He has'로 써야 해.");
+
+        return errors.length ? "<span style='color:#e67e22;'>💡 <b>문법 팁</b></span><br>" + errors.join("<br>") 
+                             : "<span style='color:#2b8a3e;'>✅ <b>완벽한 문장이야!</b> 👍</span>";
+    }
+
+    const app = {
+        userName: "",
+
+        init() {
+            document.getElementById('msg-input').onkeypress = (e) => { if(e.key === 'Enter') this.send(); };
+        },
+
+        auth() {
+            this.userName = document.getElementById('user-id').value.trim();
+            if(!this.userName) return alert("이름을 입력하세요.");
+            document.getElementById('auth-overlay').classList.add('hidden');
+            document.getElementById('sidebar').style.display = 'flex';
+            this.startScenario();
+        },
+
+        changeScenario(type, btn) {
+            scenarioBrain.current = type;
+            scenarioBrain.step = 0;
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('chat-display').innerHTML = "";
+            this.startScenario();
+        },
+
+        startScenario() {
+            const flow = scenarioBrain[scenarioBrain.current].flow;
+            const msg = flow[scenarioBrain.step];
+            this.addMsg('ai', msg.en, msg.ko);
+        },
+
+        addMsg(type, en, ko = "", grammar = "") {
+            const disp = document.getElementById('chat-display');
+            const group = document.createElement('div');
+            group.className = `msg-group ${type}`;
+            
+            group.innerHTML = `
+                <div class="bubble-container">
+                    ${type === 'ai' && grammar ? `<div class="grammar-feedback-box">${grammar}</div>` : ''}
+                    <div>${en}</div>
+                    ${type === 'ai' ? `
+                        <button class="translate-btn" onclick="app.toggleTrans(this)">해석 보기</button>
+                        <div class="translation-text">${ko}</div>
+                    ` : ''}
+                </div>
+            `;
+            disp.appendChild(group);
+
+            // [스크롤 락 애니메이션 시스템 가동]
+            disp.scrollTo({
+                top: disp.scrollHeight,
+                behavior: 'smooth'
+            });
+        },
+
+        toggleTrans(btn) {
+            const box = btn.nextElementSibling;
+            const isHidden = box.style.display === 'none' || box.style.display === '';
+            box.style.display = isHidden ? 'block' : 'none';
+            btn.innerText = isHidden ? '해석 숨기기' : '해석 보기';
+            
+            // 해석 보기가 켜지면서 늘어나도 아래로 자동 스크롤 추적
+            const disp = document.getElementById('chat-display');
+            setTimeout(() => { disp.scrollTop = disp.scrollHeight; }, 50);
+        },
+
+        send() {
+            const input = document.getElementById('msg-input');
+            const val = input.value.trim();
+            if(!val) return;
+
+            this.addMsg('user', val);
+            input.value = "";
+
+            const grammar = checkGrammar(val);
+
+            setTimeout(() => {
+                const brain = scenarioBrain[scenarioBrain.current];
+                if(scenarioBrain.step < brain.flow.length - 1) {
+                    scenarioBrain.step++;
+                }
+                
+                const next = brain.flow[scenarioBrain.step];
+                this.addMsg('ai', next.en, next.ko, grammar);
+            }, 600);
+        },
+
+        suggestWords() {
+            const val = document.getElementById('word-input').value.trim();
+            const box = document.getElementById('suggestion-box');
+            if(!val) { box.style.display = 'none'; return; }
+            const matches = Object.keys(wordDict).filter(k => k.includes(val));
+            if(matches.length > 0) {
+                box.innerHTML = matches.map(m => `<div class="suggest-item" onclick="app.selectWord('${m}')">${m} ➔ ${wordDict[m]}</div>`).join('');
+                box.style.display = 'block';
+            } else { box.style.display = 'none'; }
+        },
+
+        selectWord(w) {
+            document.getElementById('word-input').value = w;
+            document.getElementById('search-result').innerText = `💎 ${wordDict[w]}`;
+            document.getElementById('suggestion-box').style.display = 'none';
+        }
+    };
+
+    app.init();
+</script>
+</body>
+</html>
