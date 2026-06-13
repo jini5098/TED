@@ -6,6 +6,7 @@
 <title>TED – The Entry Data</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --c1:#FF6B6B; --c2:#FFB347; --c3:#6BCB77; --c4:#4D96FF; --c5:#FF922B; --c6:#9B5DE5; --c7:#00BBD4; --c8:#F72585;
@@ -274,62 +275,10 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
 }
 .emoji-btn.selected { border-color:var(--c4); background:rgba(77,150,255,0.12); }
 .emoji-btn:hover { border-color:var(--c6); }
-
-/* ===== ADMIN PANEL ===== */
-.admin-wrap { padding:20px; max-width:900px; margin:0 auto; }
-.admin-header {
-  display:flex; align-items:center; gap:10px; margin-bottom:18px;
-}
-.admin-badge {
-  background:linear-gradient(135deg,#FF6B6B,#F72585);
-  color:#fff; font-size:11px; font-weight:900; padding:4px 10px;
-  border-radius:20px; letter-spacing:1px; text-transform:uppercase;
-}
-.admin-title { font-size:16px; font-weight:900; color:var(--text); }
-.admin-table-wrap {
-  background:var(--card); border:1.5px solid var(--border);
-  border-radius:var(--radius); overflow:hidden;
-  box-shadow:var(--shadow);
-}
-.admin-table { width:100%; border-collapse:collapse; }
-.admin-table thead tr { background:var(--bg2); }
-.admin-table th {
-  padding:12px 16px; font-size:11px; font-weight:900;
-  color:var(--text2); text-align:left; letter-spacing:1px; text-transform:uppercase;
-  border-bottom:1.5px solid var(--border);
-}
-.admin-table td {
-  padding:11px 16px; font-size:13px; font-weight:600;
-  color:var(--text); border-bottom:1px solid var(--border);
-}
-.admin-table tr:last-child td { border-bottom:none; }
-.admin-table tr:hover td { background:var(--bg2); }
-.pw-cell {
-  font-family:monospace; background:var(--bg2);
-  border:1px solid var(--border); border-radius:6px;
-  padding:3px 8px; font-size:12px; font-weight:700; color:#9B5DE5;
-}
-.admin-count {
-  font-size:12px; font-weight:700; color:var(--text3); margin-bottom:12px;
-}
-.pill-admin {
-  font-size:12px; font-weight:800; font-family:'Nunito',sans-serif;
-  padding:6px 14px; border-radius:20px;
-  border:1.5px solid #FF6B6B;
-  background:transparent; color:#FF6B6B; cursor:pointer; transition:all 0.2s;
-  display:none;
-}
-.pill-admin.active {
-  background:linear-gradient(135deg,#FF6B6B,#F72585);
-  color:#fff; border-color:transparent;
-  box-shadow:0 2px 10px rgba(247,37,133,0.3);
-}
-.no-users { text-align:center; padding:2rem; color:var(--text3); font-size:14px; font-weight:700; }
 </style>
 </head>
 <body>
 
-<!-- ===== LOGIN ===== -->
 <div id="page-login" class="page active">
   <div class="login-bg">
     <div class="ted-logo">TED</div>
@@ -349,7 +298,6 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
   </div>
 </div>
 
-<!-- ===== DASHBOARD ===== -->
 <div id="page-dash" class="page">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:12px;">
@@ -357,16 +305,15 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
       <div class="nav-pills">
         <button class="npill active" id="pill-home" onclick="switchView('home')">내 작품</button>
         <button class="npill" id="pill-stats" onclick="switchView('stats')">전체 통계</button>
-        <button class="pill-admin" id="pill-admin" onclick="switchView('admin')">🔐 관리자</button>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
+      <button class="logout-btn" onclick="loadWorks()" style="color:var(--c4); border-color:var(--c4);">🔄 데이터 새로고침</button>
       <div class="user-chip" id="user-chip">@user</div>
       <button class="logout-btn" onclick="doLogout()">로그아웃</button>
     </div>
   </div>
 
-  <!-- HOME -->
   <div id="view-home">
     <div class="main">
       <div class="add-bar">
@@ -378,7 +325,6 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
     </div>
   </div>
 
-  <!-- DETAIL -->
   <div id="view-detail" style="display:none;">
     <div class="detail">
       <button class="back-btn" onclick="switchView('home')">← 목록으로</button>
@@ -404,13 +350,12 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
     </div>
   </div>
 
-  <!-- STATS -->
   <div id="view-stats" style="display:none;">
     <div class="stats">
       <div id="stats-empty" class="empty-state">작품을 먼저 추가해 주세요 😊</div>
       <div id="stats-content" style="display:none;">
         <div style="margin-bottom:20px;">
-          <div class="section-title">🔥 주제별 평균 조회수 — 어떤 주제가 잘 됐나?</div>
+          <div class="section-title">🔥 주제별 평균 조회수</div>
           <div class="topic-grid" id="topic-grid"></div>
         </div>
         <div class="chart-card" style="margin-bottom:14px;">
@@ -426,60 +371,19 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
       </div>
     </div>
   </div>
-
-  <!-- ADMIN -->
-  <div id="view-admin" style="display:none;">
-    <div class="admin-wrap">
-      <div class="admin-header">
-        <div class="admin-badge">🔐 Admin</div>
-        <div class="admin-title">사용자 관리 패널</div>
-      </div>
-      <div class="admin-count" id="admin-count"></div>
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>닉네임</th>
-              <th>비밀번호</th>
-              <th>작품 수</th>
-            </tr>
-          </thead>
-          <tbody id="admin-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
 </div>
 
-<!-- ===== ADD/EDIT MODAL ===== -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
   <div class="modal">
-    <div class="modal-title" id="modal-title">✨ 작품 추가</div>
+    <div class="modal-title" id="modal-title">✨ 작품 추가/수정</div>
     <div class="mform">
       <div class="mfield">
         <label>작품 이름</label>
         <input type="text" id="m-name" placeholder="예: 마리오 달리기 게임" />
       </div>
-      <div class="mfield-row">
-        <div class="mfield">
-          <label>조회수</label>
-          <input type="number" id="m-views" placeholder="0" min="0" />
-        </div>
-        <div class="mfield">
-          <label>좋아요</label>
-          <input type="number" id="m-likes" placeholder="0" min="0" />
-        </div>
-      </div>
-      <div class="mfield-row">
-        <div class="mfield">
-          <label>댓글</label>
-          <input type="number" id="m-comments" placeholder="0" min="0" />
-        </div>
-        <div class="mfield">
-          <label>북마크</label>
-          <input type="number" id="m-bookmarks" placeholder="0" min="0" />
-        </div>
+      <div class="mfield">
+        <label>엔트리 작품 주소 (URL)</label>
+        <input type="text" id="m-url" placeholder="https://playentry.org/project/..." />
       </div>
       <div class="mfield">
         <label>주제</label>
@@ -504,14 +408,19 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
 </div>
 
 <script>
+// ==========================================
+// 🔗 수파베이스 연결 설정
+// ==========================================
+const SUPABASE_URL = "https://xuaoetbkjbuokugprssl.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1YW9ldGJramJ1b2t1Z3Byc3NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjY2MTIsImV4cCI6MjA5Njc0MjYxMn0.83uFvaO297axM7zUvvOR8odg7OuQX5m_kB7vcTz3q0M";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let currentUser = localStorage.getItem('ted-user') || '';
-function worksKey() { return 'ted-works-' + currentUser; }
-let worksData = currentUser ? JSON.parse(localStorage.getItem(worksKey()) || '[]') : [];
-const ADMIN_USER = '정윤진';
+let worksData = [];
 let detailIdx = -1;
 let editMode = false;
 let selectedEmoji = '🎮';
-let detC1=null,detC2=null,stC1=null,stC2=null;
+let detC1=null, detC2=null, stC1=null, stC2=null;
 
 const PALETTES = [
   {bg:'linear-gradient(135deg,#FF6B6B,#FF922B)'},
@@ -528,15 +437,41 @@ const PALETTES = [
 const EMOJIS = ['🎮','🚀','🌿','⭐','🎨','🌊','🌸','🍀','🔥','💎','🎯','🏆','🎭','🦄','🐱','🐉','🌈','⚡','🎪','🎲'];
 const TCOLORS = ['#4D96FF','#6BCB77','#FF922B','#9B5DE5','#FFB347'];
 
+// ==========================================
+// 📥 수파베이스 데이터 로드 (로컬스토리지 대체)
+// ==========================================
+async function loadWorks() {
+  const { data, error } = await supabaseClient.from('works').select('*').order('created_at', { ascending: false });
+  if (error) { console.error(error); return; }
+  
+  if (data) {
+    // 현재 로그인한 사용자의 작품만 필터링합니다.
+    const userWorks = data.filter(row => row.username === currentUser);
+    
+    worksData = userWorks.map((row, idx) => ({
+      id: row.id,
+      name: row.work_name,
+      url: row.entry_url,
+      views: row.views,
+      likes: row.likes,
+      comments: row.comments,
+      bookmarks: row.bookmarks,
+      topic: row.topic || '게임',
+      emoji: row.emoji || '✨',
+      bg: PALETTES[idx % PALETTES.length].bg
+    }));
+    
+    renderGrid();
+    if (document.getElementById('view-stats').style.display === 'block') renderStats();
+  }
+}
+
 // ─── INIT ───
 if (currentUser) {
   document.getElementById('user-chip').textContent = '@' + currentUser;
   document.getElementById('page-login').classList.remove('active');
   document.getElementById('page-dash').classList.add('active');
-  const pillAdmin = document.getElementById('pill-admin');
-  if (currentUser === ADMIN_USER) { pillAdmin.style.display = 'inline-block'; }
-  else { pillAdmin.style.display = 'none'; }
-  renderGrid();
+  loadWorks();
 }
 
 // ─── LOGIN ───
@@ -586,7 +521,6 @@ function doLogin() {
   const MASTER_PW = 'wlslwlsl12!@';
 
   if (exists) {
-    // 기존 계정 - 비밀번호 확인
     if (pw !== MASTER_PW && localStorage.getItem(pwKey(name)) !== pw) {
       msg.textContent = '❌ 비밀번호가 틀렸습니다.';
       msg.style.color = 'var(--c1)';
@@ -595,7 +529,6 @@ function doLogin() {
       return;
     }
   } else {
-    // 신규 계정 - 비밀번호 설정
     if (pw.length < 4) { alert('비밀번호는 4자 이상이어야 합니다'); return; }
     if (pw !== pw2) {
       msg.textContent = '❌ 비밀번호가 일치하지 않습니다.';
@@ -609,15 +542,12 @@ function doLogin() {
 
   currentUser = name;
   localStorage.setItem('ted-user', name);
-  worksData = JSON.parse(localStorage.getItem(worksKey()) || '[]');
   document.getElementById('user-chip').textContent = '@' + name;
   document.getElementById('page-login').classList.remove('active');
   document.getElementById('page-dash').classList.add('active');
-  // 관리자 탭 표시
-  const pillAdmin = document.getElementById('pill-admin');
-  if (name === ADMIN_USER) { pillAdmin.style.display = 'inline-block'; }
-  else { pillAdmin.style.display = 'none'; }
-  renderGrid();
+  
+  // 로그인 성공 시 수파베이스에서 데이터를 불러옵니다.
+  loadWorks();
 }
 
 function doLogout() {
@@ -630,22 +560,14 @@ function doLogout() {
   document.getElementById('pw-section').style.display = 'none';
   document.getElementById('login-msg').textContent = '';
   document.getElementById('login-heading').textContent = '✏️ 닉네임을 입력하고 시작하세요';
-  document.getElementById('pill-admin').style.display = 'none';
 }
 
 // ─── VIEW ───
-
 function switchView(v) {
-  ['home','detail','stats','admin'].forEach(n => {
-    const el = document.getElementById('view-'+n);
-    if (el) el.style.display = v===n ? 'block' : 'none';
-  });
-  document.getElementById('pill-home').classList.toggle('active', v === 'home' || v === 'detail');
+  ['home','detail','stats'].forEach(n => document.getElementById('view-'+n).style.display = v===n ? 'block' : 'none');
+  document.getElementById('pill-home').classList.toggle('active', v !== 'stats');
   document.getElementById('pill-stats').classList.toggle('active', v === 'stats');
-  const pillAdmin = document.getElementById('pill-admin');
-  if (pillAdmin) pillAdmin.classList.toggle('active', v === 'admin');
   if (v === 'stats') renderStats();
-  if (v === 'admin') renderAdmin();
 }
 
 // ─── GRID ───
@@ -740,14 +662,6 @@ function openDetail(idx) {
   });
 }
 
-function deleteWork() {
-  if (!confirm(`"${worksData[detailIdx].name}" 작품을 삭제할까요?`)) return;
-  worksData.splice(detailIdx, 1);
-  saveData();
-  switchView('home');
-  renderGrid();
-}
-
 // ─── MODAL ───
 function buildEmojiGrid() {
   const grid = document.getElementById('emoji-grid');
@@ -771,10 +685,7 @@ function openAddModal() {
   selectedEmoji = EMOJIS[0];
   document.getElementById('modal-title').textContent = '✨ 작품 추가';
   document.getElementById('m-name').value = '';
-  document.getElementById('m-views').value = '';
-  document.getElementById('m-likes').value = '';
-  document.getElementById('m-comments').value = '';
-  document.getElementById('m-bookmarks').value = '';
+  document.getElementById('m-url').value = '';
   document.getElementById('m-topic').value = '게임';
   buildEmojiGrid();
   document.getElementById('modal-overlay').classList.add('open');
@@ -788,10 +699,7 @@ function openEditModal() {
   selectedEmoji = w.emoji;
   document.getElementById('modal-title').textContent = '✏️ 작품 수정';
   document.getElementById('m-name').value = w.name;
-  document.getElementById('m-views').value = w.views;
-  document.getElementById('m-likes').value = w.likes;
-  document.getElementById('m-comments').value = w.comments;
-  document.getElementById('m-bookmarks').value = w.bookmarks;
+  document.getElementById('m-url').value = w.url;
   document.getElementById('m-topic').value = w.topic;
   buildEmojiGrid();
   document.getElementById('modal-overlay').classList.add('open');
@@ -805,30 +713,50 @@ function closeModalOnOverlay(e) {
   if (e.target === document.getElementById('modal-overlay')) closeModal();
 }
 
-function saveWork() {
+// ✨ 수파베이스 저장/수정 함수
+async function saveWork() {
   const name = document.getElementById('m-name').value.trim();
+  const url = document.getElementById('m-url').value.trim();
+  const topic = document.getElementById('m-topic').value;
+
   if (!name) { alert('작품 이름을 입력해 주세요'); return; }
-  const views    = parseInt(document.getElementById('m-views').value) || 0;
-  const likes    = parseInt(document.getElementById('m-likes').value) || 0;
-  const comments = parseInt(document.getElementById('m-comments').value) || 0;
-  const bookmarks= parseInt(document.getElementById('m-bookmarks').value) || 0;
-  const topic    = document.getElementById('m-topic').value;
+  if (!url) { alert('작품 주소를 입력해 주세요'); return; }
 
   if (editMode && detailIdx >= 0) {
     const w = worksData[detailIdx];
-    worksData[detailIdx] = { ...w, name, views, likes, comments, bookmarks, topic, emoji: selectedEmoji };
-    saveData();
+    await supabaseClient.from('works').update({
+        work_name: name,
+        entry_url: url,
+        topic: topic,
+        emoji: selectedEmoji
+    }).eq('id', w.id);
+    
     closeModal();
-    renderGrid();
-    openDetail(detailIdx);
+    switchView('home');
+    await loadWorks();
   } else {
-    const idx = worksData.length;
-    const pal = PALETTES[idx % PALETTES.length];
-    worksData.push({ name, views, likes, comments, bookmarks, topic, emoji: selectedEmoji, bg: pal.bg });
-    saveData();
+    const newWork = {
+      username: currentUser,
+      work_name: name,
+      entry_url: url,
+      views: 0, likes: 0, comments: 0, bookmarks: 0,
+      topic: topic, emoji: selectedEmoji
+    };
+    
+    await supabaseClient.from('works').insert([newWork]);
     closeModal();
-    renderGrid();
+    alert('작품이 등록되었습니다! 파이썬 봇이 곧 숫자를 채워줍니다.');
+    await loadWorks();
   }
+}
+
+// ✨ 수파베이스 삭제 함수
+async function deleteWork() {
+  if (!confirm(`"${worksData[detailIdx].name}" 작품을 삭제할까요?`)) return;
+  const targetId = worksData[detailIdx].id;
+  await supabaseClient.from('works').delete().eq('id', targetId);
+  switchView('home');
+  await loadWorks();
 }
 
 // ─── STATS ───
@@ -914,56 +842,24 @@ function renderStats() {
       responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw.label}: 조회 ${c.raw.x.toLocaleString()} / 좋아요 ${c.raw.y.toLocaleString()}`}}},
       scales:{
-        x:{title:{display:true,text:'조회수',color:'#4a4a7a',font:{size:12,weight:'bold'}},ticks:{color:'#4a4a7a',callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},grid:{color:'rgba(0,0,0,0.05)'}},
-        y:{title:{display:true,text:'좋아요',color:'#4a4a7a',font:{size:12,weight:'bold'}},ticks:{color:'#4a4a7a'},grid:{color:'rgba(0,0,0,0.05)'}}
+        x: {
+          ticks: { color: '#4a4a7a', font: { size: 10 }, callback: v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v },
+          grid: { color: 'rgba(0,0,0,0.05)' }
+        },
+        y: {
+          ticks: { color: '#4a4a7a', font: { size: 10 }, callback: v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v },
+          grid: { color: 'rgba(0,0,0,0.05)' }
+        }
       }
     }
   });
 }
 
-// ─── ADMIN ───
-function renderAdmin() {
-  if (currentUser !== ADMIN_USER) return;
-  const tbody = document.getElementById('admin-tbody');
-  const countEl = document.getElementById('admin-count');
-  tbody.innerHTML = '';
-
-  // localStorage에서 ted-pw- 키를 가진 모든 사용자 수집
-  const users = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith('ted-pw-')) {
-      const nickname = key.slice('ted-pw-'.length);
-      const pw = localStorage.getItem(key);
-      const works = JSON.parse(localStorage.getItem('ted-works-' + nickname) || '[]');
-      users.push({ nickname, pw, worksCount: works.length });
-    }
-  }
-
-  countEl.textContent = `총 ${users.length}명의 사용자가 등록되어 있습니다.`;
-
-  if (!users.length) {
-    tbody.innerHTML = '<tr><td colspan="4" class="no-users">등록된 사용자가 없습니다.</td></tr>';
-    return;
-  }
-
-  users.sort((a, b) => a.nickname.localeCompare(b.nickname));
-  users.forEach((u, i) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="color:var(--text3);font-weight:800;">${i + 1}</td>
-      <td><b>@${u.nickname}</b>${u.nickname === ADMIN_USER ? ' <span style="font-size:10px;color:#F72585;font-weight:900;">👑 관리자</span>' : ''}</td>
-      <td><span class="pw-cell">${u.pw}</span></td>
-      <td style="color:var(--c4);font-weight:800;">${u.worksCount}개</td>`;
-    tbody.appendChild(tr);
-  });
-}
-
 // ─── UTILS ───
-function saveData() {
-  localStorage.setItem(worksKey(), JSON.stringify(worksData));
+function fmt(num) {
+  if (!num) return 0;
+  return num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toLocaleString();
 }
-function fmt(n) { return n >= 1000 ? (n/1000).toFixed(1)+'k' : String(n); }
 </script>
 </body>
 </html>
