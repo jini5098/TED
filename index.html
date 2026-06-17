@@ -4,277 +4,623 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TED – The Entry Data</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
+/* ==========================================
+   🎨 1. 기본 색상 및 폰트 설정
+========================================== */
 :root {
-  --c1:#FF6B6B; --c2:#FFB347; --c3:#6BCB77; --c4:#4D96FF; --c5:#FF922B; --c6:#9B5DE5; --c7:#00BBD4; --c8:#F72585;
-  --bg:#F5F7FF; --bg2:#EEF1FF; --bg3:#fff;
-  --card:#ffffff; --card2:#F8F9FF;
-  --text:#1a1a2e; --text2:#4a4a7a; --text3:#8888bb;
-  --border:#E0E4FF;
-  --radius:16px; --radius-sm:10px;
-  --shadow:0 4px 20px rgba(77,150,255,0.10);
-  --shadow-hover:0 8px 32px rgba(77,150,255,0.18);
+  --c1: #FF6B6B; 
+  --c2: #FFB347; 
+  --c3: #6BCB77; 
+  --c4: #4D96FF; 
+  --c5: #FF922B; 
+  --c6: #9B5DE5; 
+  --c7: #00BBD4; 
+  --c8: #F72585;
+  --bg: #F5F7FF; 
+  --bg2: #EEF1FF; 
+  --bg3: #fff;
+  --card: #ffffff; 
+  --card2: #F8F9FF;
+  --text: #1a1a2e; 
+  --text2: #4a4a7a; 
+  --text3: #8888bb;
+  --border: #E0E4FF;
+  --radius: 16px; 
+  --radius-sm: 10px;
+  --shadow: 0 4px 20px rgba(77,150,255,0.10);
+  --shadow-hover: 0 8px 32px rgba(77,150,255,0.18);
 }
-* { box-sizing:border-box; margin:0; padding:0; }
-body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
-.page { display:none; }
-.page.active { display:block; }
 
-::-webkit-scrollbar { width:5px; }
-::-webkit-scrollbar-track { background:var(--bg2); }
-::-webkit-scrollbar-thumb { background:var(--c4); border-radius:3px; }
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
 
-/* ===== LOGIN ===== */
-.login-bg {
-  min-height:100vh; display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  padding:2rem 1rem; background:var(--bg);
-  position:relative; overflow:hidden;
+body { 
+  font-family: 'Nunito', sans-serif; 
+  background: var(--bg); 
+  color: var(--text); 
+  min-height: 100vh; 
 }
-.login-bg::before {
-  content:''; position:absolute; width:400px; height:400px; border-radius:50%;
-  background:radial-gradient(circle,rgba(77,150,255,0.12) 0%,transparent 70%);
-  top:-100px; left:-100px; pointer-events:none;
-}
-.login-bg::after {
-  content:''; position:absolute; width:350px; height:350px; border-radius:50%;
-  background:radial-gradient(circle,rgba(155,93,229,0.10) 0%,transparent 70%);
-  bottom:-80px; right:-80px; pointer-events:none;
-}
-.ted-logo {
-  font-size:64px; font-weight:900; letter-spacing:-3px;
-  background:linear-gradient(135deg,var(--c4),var(--c6),var(--c8));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-  margin-bottom:4px;
-  animation:logoPop 0.6s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes logoPop { from{transform:scale(0.5);opacity:0;} to{transform:scale(1);opacity:1;} }
-.ted-sub { font-size:12px; color:var(--text3); letter-spacing:4px; text-transform:uppercase; margin-bottom:2rem; font-weight:700; }
-.login-card {
-  background:var(--card); border:1.5px solid var(--border);
-  border-radius:var(--radius); padding:2rem; width:100%; max-width:380px;
-  box-shadow:var(--shadow);
-}
-.login-card h2 { font-size:15px; font-weight:900; color:var(--text2); margin-bottom:1.2rem; }
-.lform { display:flex; flex-direction:column; gap:10px; }
-.lform input {
-  padding:11px 14px; font-size:14px; font-family:'Nunito',sans-serif; font-weight:600;
-  border:1.5px solid var(--border); border-radius:var(--radius-sm);
-  background:var(--bg2); color:var(--text); outline:none; transition:border-color 0.2s, box-shadow 0.2s;
-}
-.lform input:focus { border-color:var(--c4); box-shadow:0 0 0 3px rgba(77,150,255,0.15); }
-.lform input::placeholder { color:var(--text3); font-weight:600; }
-.lbtn {
-  padding:12px; font-size:14px; font-weight:800; font-family:'Nunito',sans-serif;
-  border-radius:var(--radius-sm); cursor:pointer; border:none; color:#fff;
-  background:linear-gradient(135deg,var(--c4),var(--c6));
-  transition:transform 0.15s, box-shadow 0.15s;
-}
-.lbtn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(77,150,255,0.3); }
-.lbtn:active { transform:scale(0.98); }
 
-/* ===== TOPBAR ===== */
-.topbar {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:12px 20px; background:var(--card);
-  border-bottom:1.5px solid var(--border);
-  position:sticky; top:0; z-index:20;
-  box-shadow:0 2px 12px rgba(77,150,255,0.08);
-}
-.ted-sm {
-  font-size:22px; font-weight:900; cursor:pointer;
-  background:linear-gradient(135deg,var(--c4),var(--c6));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-}
-.nav-pills { display:flex; gap:6px; }
-.npill {
-  font-size:12px; font-weight:800; font-family:'Nunito',sans-serif;
-  padding:6px 14px; border-radius:20px;
-  border:1.5px solid var(--border);
-  background:transparent; color:var(--text2); cursor:pointer; transition:all 0.2s;
-}
-.npill.active {
-  background:linear-gradient(135deg,var(--c4),var(--c6));
-  color:#fff; border-color:transparent;
-  box-shadow:0 2px 10px rgba(77,150,255,0.3);
-}
-.user-chip {
-  font-size:12px; font-weight:800; color:var(--c4);
-  background:rgba(77,150,255,0.1); border:1.5px solid rgba(77,150,255,0.25);
-  border-radius:20px; padding:5px 12px;
-}
-.logout-btn {
-  font-size:12px; font-weight:700; font-family:'Nunito',sans-serif;
-  color:var(--text3); background:none; border:1.5px solid var(--border);
-  border-radius:20px; cursor:pointer; padding:5px 12px; transition:all 0.2s;
-}
-.logout-btn:hover { color:var(--c1); border-color:var(--c1); }
+.page { 
+  display: none; 
+} 
 
-/* ===== MAIN ===== */
-.main { padding:20px; max-width:900px; margin:0 auto; }
+.page.active { 
+  display: block; 
+}
 
-/* ===== ADD WORK BUTTON ===== */
-.add-bar {
-  display:flex; justify-content:space-between; align-items:center;
-  margin-bottom:20px; flex-wrap:wrap; gap:10px;
-}
-.add-bar-title { font-size:14px; font-weight:900; color:var(--text2); }
-.add-btn {
-  padding:10px 20px; font-size:13px; font-weight:800; font-family:'Nunito',sans-serif;
-  background:linear-gradient(135deg,var(--c4),var(--c6)); color:#fff;
-  border:none; border-radius:var(--radius-sm); cursor:pointer;
-  transition:transform 0.15s, box-shadow 0.15s;
-  box-shadow:0 4px 14px rgba(77,150,255,0.3);
-}
-.add-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(77,150,255,0.4); }
+/* 스크롤바 디자인 */
+::-webkit-scrollbar { 
+  width: 5px; 
+} 
 
-/* ===== WORKS GRID ===== */
-.works-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(165px,1fr)); gap:14px; }
-.work-card {
-  background:var(--card); border:1.5px solid var(--border);
-  border-radius:var(--radius); overflow:hidden; cursor:pointer;
-  transition:transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-  animation:cardIn 0.4s cubic-bezier(0.34,1.2,0.64,1) both;
-  box-shadow:var(--shadow);
-}
-.work-card:hover { transform:translateY(-5px); box-shadow:var(--shadow-hover); border-color:var(--c4); }
-@keyframes cardIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
-.thumb-box {
-  width:100%; height:110px; display:flex; align-items:center; justify-content:center;
-  font-size:42px; position:relative;
-}
-.card-body { padding:10px 12px 12px; }
-.card-title {
-  font-size:13px; font-weight:800; color:var(--text);
-  margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.card-stats { display:flex; gap:8px; flex-wrap:wrap; }
-.cstat { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:700; }
-.cs-v { color:#4D96FF; } .cs-l { color:#FF6B6B; } .cs-b { color:#FFB347; }
+::-webkit-scrollbar-track { 
+  background: var(--bg2); 
+} 
 
-/* ===== DETAIL ===== */
-.detail { padding:20px; max-width:900px; margin:0 auto; }
-.back-btn {
-  display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:800;
-  font-family:'Nunito',sans-serif; color:var(--text2); background:var(--card);
-  border:1.5px solid var(--border); border-radius:20px;
-  padding:7px 16px; cursor:pointer; margin-bottom:18px;
-  transition:all 0.2s; box-shadow:var(--shadow);
+::-webkit-scrollbar-thumb { 
+  background: var(--c4); 
+  border-radius: 3px; 
 }
-.back-btn:hover { color:var(--c4); border-color:var(--c4); }
-.detail-hero {
-  border-radius:var(--radius); overflow:hidden; margin-bottom:16px;
-  box-shadow:var(--shadow); border:1.5px solid var(--border);
-}
-.detail-hero-thumb { width:100%; height:150px; display:flex; align-items:center; justify-content:center; font-size:64px; }
-.detail-hero-info {
-  background:var(--card); padding:16px 20px;
-  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
-}
-.detail-title { font-size:18px; font-weight:900; color:var(--text); }
-.detail-stats-row { display:flex; gap:12px; flex-wrap:wrap; }
-.dstat { display:flex; align-items:center; gap:6px; }
-.dstat-icon { width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; }
-.dstat-val { font-size:15px; font-weight:900; }
-.dstat-lbl { font-size:11px; color:var(--text3); font-weight:700; }
-.chart-card {
-  background:var(--card); border:1.5px solid var(--border);
-  border-radius:var(--radius); padding:18px; margin-bottom:14px;
-  box-shadow:var(--shadow);
-}
-.chart-card-title { font-size:13px; font-weight:800; color:var(--text2); margin-bottom:12px; }
 
-/* detail action buttons */
-.detail-actions { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
-.edit-btn {
-  padding:8px 16px; font-size:12px; font-weight:800; font-family:'Nunito',sans-serif;
-  background:linear-gradient(135deg,var(--c4),var(--c6)); color:#fff;
-  border:none; border-radius:20px; cursor:pointer; transition:all 0.2s;
+/* ==========================================
+   🔐 2. 로그인 화면
+========================================== */
+.login-bg { 
+  min-height: 100vh; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center; 
+  padding: 2rem 1rem; 
+  background: var(--bg); 
+  position: relative; 
+  overflow: hidden; 
 }
-.del-btn {
-  padding:8px 16px; font-size:12px; font-weight:800; font-family:'Nunito',sans-serif;
-  background:none; color:var(--c1);
-  border:1.5px solid var(--c1); border-radius:20px; cursor:pointer; transition:all 0.2s;
-}
-.del-btn:hover { background:var(--c1); color:#fff; }
 
-/* ===== STATS ===== */
-.stats { padding:20px; max-width:900px; margin:0 auto; }
-.section-title {
-  font-size:13px; font-weight:900; color:var(--text2);
-  margin-bottom:12px; letter-spacing:1px; text-transform:uppercase;
+.ted-logo { 
+  font-size: 64px; 
+  font-weight: 900; 
+  letter-spacing: -3px; 
+  background: linear-gradient(135deg, var(--c4), var(--c6), var(--c8)); 
+  -webkit-background-clip: text; 
+  -webkit-text-fill-color: transparent; 
+  margin-bottom: 4px; 
 }
-.topic-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-bottom:18px; }
-.topic-card {
-  border-radius:var(--radius-sm); padding:14px 15px; position:relative; overflow:hidden;
-  border:1.5px solid var(--border); transition:transform 0.2s, box-shadow 0.2s;
-  background:var(--card); box-shadow:var(--shadow);
-}
-.topic-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-hover); }
-.topic-rank { position:absolute; top:8px; right:8px; font-size:14px; }
-.topic-name { font-size:13px; font-weight:900; color:var(--text); margin-bottom:6px; }
-.topic-bar-wrap { height:5px; background:var(--bg2); border-radius:3px; margin-bottom:7px; overflow:hidden; }
-.topic-bar { height:5px; border-radius:3px; transition:width 0.8s cubic-bezier(0.34,1.2,0.64,1); }
-.topic-val { font-size:11px; font-weight:700; color:var(--text2); }
 
-/* ===== MISC ===== */
-.empty-state { text-align:center; padding:4rem 1rem; color:var(--text3); font-size:15px; font-weight:700; line-height:2; }
+.ted-sub { 
+  font-size: 12px; 
+  color: var(--text3); 
+  letter-spacing: 4px; 
+  text-transform: uppercase; 
+  margin-bottom: 2rem; 
+  font-weight: 700; 
+}
 
-/* ===== MODAL ===== */
-.modal-overlay {
-  display:none; position:fixed; inset:0; z-index:100;
-  background:rgba(26,26,46,0.5); backdrop-filter:blur(4px);
-  align-items:center; justify-content:center; padding:1rem;
+.login-card { 
+  background: var(--card); 
+  border: 1.5px solid var(--border); 
+  border-radius: var(--radius); 
+  padding: 2rem; 
+  width: 100%; 
+  max-width: 380px; 
+  box-shadow: var(--shadow); 
 }
-.modal-overlay.open { display:flex; }
-.modal {
-  background:var(--card); border:1.5px solid var(--border);
-  border-radius:var(--radius); padding:1.8rem;
-  width:100%; max-width:420px; max-height:90vh; overflow-y:auto;
-  box-shadow:0 20px 60px rgba(77,150,255,0.2);
-  animation:modalIn 0.3s cubic-bezier(0.34,1.2,0.64,1);
+
+.login-card h2 { 
+  font-size: 15px; 
+  font-weight: 900; 
+  color: var(--text2); 
+  margin-bottom: 1.2rem; 
 }
-@keyframes modalIn { from{transform:scale(0.9);opacity:0;} to{transform:scale(1);opacity:1;} }
-.modal-title { font-size:16px; font-weight:900; color:var(--text); margin-bottom:1.4rem; }
-.mform { display:flex; flex-direction:column; gap:12px; }
-.mfield label {
-  display:block; font-size:12px; font-weight:800; color:var(--text2);
-  margin-bottom:5px; letter-spacing:0.5px; text-transform:uppercase;
+
+.lform { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 10px; 
 }
-.mfield input, .mfield select {
-  width:100%; padding:10px 13px; font-size:14px; font-family:'Nunito',sans-serif; font-weight:600;
-  border:1.5px solid var(--border); border-radius:var(--radius-sm);
-  background:var(--bg2); color:var(--text); outline:none; transition:border-color 0.2s;
+
+.lform input { 
+  padding: 11px 14px; 
+  font-size: 14px; 
+  font-family: 'Nunito', sans-serif; 
+  font-weight: 600; 
+  border: 1.5px solid var(--border); 
+  border-radius: var(--radius-sm); 
+  background: var(--bg2); 
+  color: var(--text); 
+  outline: none; 
 }
-.mfield input:focus, .mfield select:focus { border-color:var(--c4); box-shadow:0 0 0 3px rgba(77,150,255,0.12); }
-.mfield-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.modal-actions { display:flex; gap:8px; margin-top:4px; }
-.m-save {
-  flex:1; padding:11px; font-size:14px; font-weight:800; font-family:'Nunito',sans-serif;
-  background:linear-gradient(135deg,var(--c4),var(--c6)); color:#fff;
-  border:none; border-radius:var(--radius-sm); cursor:pointer;
-  transition:transform 0.15s;
+
+.lbtn { 
+  padding: 12px; 
+  font-size: 14px; 
+  font-weight: 800; 
+  border-radius: var(--radius-sm); 
+  cursor: pointer; 
+  border: none; 
+  color: #fff; 
+  background: linear-gradient(135deg, var(--c4), var(--c6)); 
 }
-.m-save:hover { transform:translateY(-1px); }
-.m-cancel {
-  padding:11px 18px; font-size:14px; font-weight:800; font-family:'Nunito',sans-serif;
-  background:none; color:var(--text2); border:1.5px solid var(--border);
-  border-radius:var(--radius-sm); cursor:pointer; transition:all 0.2s;
+
+/* ==========================================
+   📱 3. 대시보드 공통 (상단바 등)
+========================================== */
+.topbar { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding: 12px 20px; 
+  background: var(--card); 
+  border-bottom: 1.5px solid var(--border); 
+  position: sticky; 
+  top: 0; 
+  z-index: 20; 
+  box-shadow: 0 2px 12px rgba(77,150,255,0.08); 
 }
-.m-cancel:hover { border-color:var(--c4); color:var(--c4); }
-.emoji-grid {
-  display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:4px;
+
+.ted-sm { 
+  font-size: 22px; 
+  font-weight: 900; 
+  cursor: pointer; 
+  background: linear-gradient(135deg, var(--c4), var(--c6)); 
+  -webkit-background-clip: text; 
+  -webkit-text-fill-color: transparent; 
 }
-.emoji-btn {
-  padding:8px; font-size:22px; border-radius:8px; cursor:pointer;
-  background:var(--bg2); border:2px solid transparent; transition:all 0.15s;
-  display:flex; align-items:center; justify-content:center;
+
+.nav-pills { 
+  display: flex; 
+  gap: 6px; 
+} 
+
+.npill { 
+  font-size: 12px; 
+  font-weight: 800; 
+  padding: 6px 14px; 
+  border-radius: 20px; 
+  border: 1.5px solid var(--border); 
+  background: transparent; 
+  color: var(--text2); 
+  cursor: pointer; 
+} 
+
+.npill.active { 
+  background: linear-gradient(135deg, var(--c4), var(--c6)); 
+  color: #fff; 
+  border-color: transparent; 
+  box-shadow: 0 2px 10px rgba(77,150,255,0.3); 
 }
-.emoji-btn.selected { border-color:var(--c4); background:rgba(77,150,255,0.12); }
-.emoji-btn:hover { border-color:var(--c6); }
+
+.user-chip { 
+  font-size: 12px; 
+  font-weight: 800; 
+  color: var(--c4); 
+  background: rgba(77,150,255,0.1); 
+  border: 1.5px solid rgba(77,150,255,0.25); 
+  border-radius: 20px; 
+  padding: 5px 12px; 
+}
+
+.logout-btn { 
+  font-size: 12px; 
+  font-weight: 700; 
+  color: var(--text3); 
+  background: none; 
+  border: 1.5px solid var(--border); 
+  border-radius: 20px; 
+  cursor: pointer; 
+  padding: 5px 12px; 
+}
+
+.main, .detail, .stats { 
+  padding: 20px; 
+  max-width: 900px; 
+  margin: 0 auto; 
+}
+
+.add-bar { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 20px; 
+  flex-wrap: wrap; 
+  gap: 10px; 
+} 
+
+.add-bar-title { 
+  font-size: 14px; 
+  font-weight: 900; 
+  color: var(--text2); 
+}
+
+.add-btn { 
+  padding: 10px 20px; 
+  font-size: 13px; 
+  font-weight: 800; 
+  background: linear-gradient(135deg, var(--c4), var(--c6)); 
+  color: #fff; 
+  border: none; 
+  border-radius: var(--radius-sm); 
+  cursor: pointer; 
+  box-shadow: 0 4px 14px rgba(77,150,255,0.3); 
+}
+
+/* ==========================================
+   🖼️ 4. 작품 카드 그리드
+========================================== */
+.works-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); 
+  gap: 14px; 
+} 
+
+.work-card { 
+  background: var(--card); 
+  border: 1.5px solid var(--border); 
+  border-radius: var(--radius); 
+  overflow: hidden; 
+  cursor: pointer; 
+  box-shadow: var(--shadow); 
+  position: relative; 
+  transition: transform 0.2s; 
+}
+
+.work-card:hover { 
+  transform: translateY(-5px); 
+  box-shadow: var(--shadow-hover); 
+  border-color: var(--c4); 
+}
+
+.badges { 
+  position: absolute; 
+  top: 8px; 
+  right: 8px; 
+  display: flex; 
+  gap: 4px; 
+  z-index: 10; 
+}
+
+.badge { 
+  font-size: 10px; 
+  font-weight: 900; 
+  padding: 4px 8px; 
+  border-radius: 12px; 
+  color: #fff; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2); 
+}
+
+.badge-best { 
+  background: linear-gradient(135deg, #FFD93D, #FF922B); 
+  color: #855E00; 
+  border: 1px solid rgba(255,255,255,0.5); 
+}
+
+.badge-hot { 
+  background: linear-gradient(135deg, #FF6B6B, #F72585); 
+}
+
+.thumb-box { 
+  width: 100%; 
+  height: 110px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 42px; 
+} 
+
+.card-body { 
+  padding: 10px 12px 12px; 
+} 
+
+.card-title { 
+  font-size: 13px; 
+  font-weight: 800; 
+  margin-bottom: 8px; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+} 
+
+.card-stats { 
+  display: flex; 
+  gap: 8px; 
+  flex-wrap: wrap; 
+} 
+
+.cstat { 
+  display: flex; 
+  align-items: center; 
+  gap: 4px; 
+  font-size: 11px; 
+  font-weight: 700; 
+}
+
+.cs-v { color: #4D96FF; } 
+.cs-l { color: #FF6B6B; } 
+.cs-b { color: #FFB347; }
+
+/* ==========================================
+   🔍 5. 상세 페이지 & 통계 페이지
+========================================== */
+.back-btn { 
+  display: inline-flex; 
+  align-items: center; 
+  gap: 6px; 
+  font-size: 13px; 
+  font-weight: 800; 
+  border: 1.5px solid var(--border); 
+  border-radius: 20px; 
+  padding: 7px 16px; 
+  cursor: pointer; 
+  margin-bottom: 18px; 
+  background: var(--card); 
+  color: var(--text2); 
+}
+
+.detail-hero { 
+  border-radius: var(--radius); 
+  overflow: hidden; 
+  margin-bottom: 16px; 
+  box-shadow: var(--shadow); 
+  border: 1.5px solid var(--border); 
+} 
+
+.detail-hero-thumb { 
+  width: 100%; 
+  height: 150px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 64px; 
+}
+
+.detail-hero-info { 
+  background: var(--card); 
+  padding: 16px 20px; 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  flex-wrap: wrap; 
+  gap: 12px; 
+} 
+
+.detail-title { 
+  font-size: 18px; 
+  font-weight: 900; 
+  color: var(--text); 
+} 
+
+.detail-stats-row { 
+  display: flex; 
+  gap: 12px; 
+  flex-wrap: wrap; 
+} 
+
+.dstat { 
+  display: flex; 
+  align-items: center; 
+  gap: 6px; 
+} 
+
+.dstat-icon { 
+  width: 26px; 
+  height: 26px; 
+  border-radius: 8px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 13px; 
+} 
+
+.dstat-val { 
+  font-size: 15px; 
+  font-weight: 900; 
+} 
+
+.dstat-lbl { 
+  font-size: 11px; 
+  color: var(--text3); 
+  font-weight: 700; 
+}
+
+.chart-card { 
+  background: var(--card); 
+  border: 1.5px solid var(--border); 
+  border-radius: var(--radius); 
+  padding: 18px; 
+  margin-bottom: 14px; 
+  box-shadow: var(--shadow); 
+} 
+
+.chart-card-title { 
+  font-size: 13px; 
+  font-weight: 800; 
+  color: var(--text2); 
+  margin-bottom: 12px; 
+}
+
+.detail-actions { 
+  display: flex; 
+  gap: 8px; 
+  margin-bottom: 16px; 
+  flex-wrap: wrap; 
+} 
+
+.edit-btn, .del-btn { 
+  padding: 8px 16px; 
+  font-size: 12px; 
+  font-weight: 800; 
+  border-radius: 20px; 
+  cursor: pointer; 
+} 
+
+.edit-btn { 
+  background: linear-gradient(135deg, var(--c4), var(--c6)); 
+  color: #fff; 
+  border: none; 
+} 
+
+.del-btn { 
+  background: none; 
+  color: var(--c1); 
+  border: 1.5px solid var(--c1); 
+}
+
+.section-title { 
+  font-size: 13px; 
+  font-weight: 900; 
+  color: var(--text2); 
+  margin-bottom: 12px; 
+  letter-spacing: 1px; 
+  text-transform: uppercase; 
+} 
+
+.topic-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+  gap: 10px; 
+  margin-bottom: 18px; 
+} 
+
+.rank-item { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 12px 16px; 
+  background: #fff; 
+  border: 1px solid var(--border); 
+  border-radius: 10px; 
+  margin-bottom: 8px; 
+  font-weight: 800; 
+  font-size: 14px; 
+  color: var(--text); 
+}
+
+.empty-state { 
+  text-align: center; 
+  padding: 4rem 1rem; 
+  color: var(--text3); 
+  font-size: 15px; 
+  font-weight: 700; 
+  line-height: 2; 
+}
+
+/* ==========================================
+   🖼️ 6. 모달 창 (추가/수정)
+========================================== */
+.modal-overlay { 
+  display: none; 
+  position: fixed; 
+  inset: 0; 
+  z-index: 100; 
+  background: rgba(26,26,46,0.5); 
+  backdrop-filter: blur(4px); 
+  align-items: center; 
+  justify-content: center; 
+  padding: 1rem; 
+} 
+
+.modal-overlay.open { 
+  display: flex; 
+}
+
+.modal { 
+  background: var(--card); 
+  border: 1.5px solid var(--border); 
+  border-radius: var(--radius); 
+  padding: 1.8rem; 
+  width: 100%; 
+  max-width: 420px; 
+  max-height: 90vh; 
+  overflow-y: auto; 
+}
+
+.modal-title { 
+  font-size: 16px; 
+  font-weight: 900; 
+  margin-bottom: 1.4rem; 
+  color: var(--text); 
+} 
+
+.mform { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px; 
+} 
+
+.mfield label { 
+  display: block; 
+  font-size: 12px; 
+  font-weight: 800; 
+  color: var(--text2); 
+  margin-bottom: 5px; 
+} 
+
+.mfield input, .mfield select { 
+  width: 100%; 
+  padding: 10px 13px; 
+  font-size: 14px; 
+  border: 1.5px solid var(--border); 
+  border-radius: var(--radius-sm); 
+  background: var(--bg2); 
+} 
+
+.modal-actions { 
+  display: flex; 
+  gap: 8px; 
+  margin-top: 4px; 
+} 
+
+.m-save, .m-cancel { 
+  flex: 1; 
+  padding: 11px; 
+  font-size: 14px; 
+  font-weight: 800; 
+  border-radius: var(--radius-sm); 
+  cursor: pointer; 
+} 
+
+.m-save { 
+  background: linear-gradient(135deg, var(--c4), var(--c6)); 
+  color: #fff; 
+  border: none; 
+} 
+
+.m-cancel { 
+  background: none; 
+  color: var(--text2); 
+  border: 1.5px solid var(--border); 
+}
+
+.emoji-grid { 
+  display: grid; 
+  grid-template-columns: repeat(5, 1fr); 
+  gap: 6px; 
+  margin-top: 4px; 
+} 
+
+.emoji-btn { 
+  padding: 8px; 
+  font-size: 22px; 
+  border-radius: 8px; 
+  cursor: pointer; 
+  background: var(--bg2); 
+  border: 2px solid transparent; 
+} 
+
+.emoji-btn.selected { 
+  border-color: var(--c4); 
+  background: rgba(77,150,255,0.12); 
+}
 </style>
 </head>
 <body>
@@ -283,15 +629,20 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
   <div class="login-bg">
     <div class="ted-logo">TED</div>
     <div class="ted-sub">The Entry Data</div>
+    
     <div class="login-card">
       <h2 id="login-heading">✏️ 닉네임을 입력하고 시작하세요</h2>
+      
       <div class="lform">
         <input type="text" id="login-name" placeholder="엔트리 닉네임 (예: 코딩왕123)" oninput="onNameInput()" />
-        <div id="pw-section" style="display:none;flex-direction:column;gap:10px;">
+        
+        <div id="pw-section" style="display:none; flex-direction:column; gap:10px;">
           <input type="password" id="login-pw" placeholder="비밀번호" />
           <input type="password" id="login-pw2" placeholder="비밀번호 확인 (신규 계정)" style="display:none;" />
         </div>
-        <div id="login-msg" style="font-size:12px;font-weight:700;color:var(--text3);min-height:16px;"></div>
+        
+        <div id="login-msg" style="font-size:12px; font-weight:700; color:var(--text3); min-height:16px;"></div>
+        
         <button class="lbtn" onclick="doLogin()">🚀 시작하기</button>
       </div>
     </div>
@@ -300,15 +651,16 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
 
 <div id="page-dash" class="page">
   <div class="topbar">
-    <div style="display:flex;align-items:center;gap:12px;">
+    <div style="display:flex; align-items:center; gap:12px;">
       <div class="ted-sm" onclick="switchView('home')">TED</div>
       <div class="nav-pills">
         <button class="npill active" id="pill-home" onclick="switchView('home')">내 작품</button>
         <button class="npill" id="pill-stats" onclick="switchView('stats')">전체 통계</button>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <button class="logout-btn" onclick="loadWorks()" style="color:var(--c4); border-color:var(--c4);">🔄 데이터 새로고침</button>
+    
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="logout-btn" onclick="loadWorks()" style="color:var(--c4); border-color:var(--c4);">🔄 새로고침</button>
       <div class="user-chip" id="user-chip">@user</div>
       <button class="logout-btn" onclick="doLogout()">로그아웃</button>
     </div>
@@ -320,7 +672,11 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
         <div class="add-bar-title">📚 내 작품 목록 <span id="works-count" style="color:var(--c4);"></span></div>
         <button class="add-btn" onclick="openAddModal()">＋ 작품 추가</button>
       </div>
-      <div id="home-empty" class="empty-state">✨ 아직 작품이 없어요!<br>위의 <b>작품 추가</b> 버튼을 눌러 추가해 보세요.</div>
+      
+      <div id="home-empty" class="empty-state">
+        ✨ 아직 작품이 없어요!<br>위의 <b>작품 추가</b> 버튼을 눌러 추가해 보세요.
+      </div>
+      
       <div class="works-grid" id="works-grid"></div>
     </div>
   </div>
@@ -328,10 +684,12 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
   <div id="view-detail" style="display:none;">
     <div class="detail">
       <button class="back-btn" onclick="switchView('home')">← 목록으로</button>
+      
       <div class="detail-actions">
         <button class="edit-btn" onclick="openEditModal()">✏️ 수정</button>
         <button class="del-btn" onclick="deleteWork()">🗑 삭제</button>
       </div>
+      
       <div class="detail-hero">
         <div class="detail-hero-thumb" id="d-thumb"></div>
         <div class="detail-hero-info">
@@ -339,13 +697,19 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
           <div class="detail-stats-row" id="d-stats-row"></div>
         </div>
       </div>
+      
       <div class="chart-card">
-        <div class="chart-card-title">📊 반응 지표 비교</div>
-        <div style="position:relative;width:100%;height:200px;"><canvas id="det-bar"></canvas></div>
+        <div class="chart-card-title">📈 성장 발자취 (조회수 꺾은선 그래프)</div>
+        <div style="position:relative; width:100%; height:220px;">
+          <canvas id="det-line"></canvas>
+        </div>
       </div>
+      
       <div class="chart-card">
-        <div class="chart-card-title">🏆 전체 작품 대비 조회수 순위</div>
-        <div style="position:relative;width:100%;height:220px;"><canvas id="det-cmp"></canvas></div>
+        <div class="chart-card-title">📊 현재 반응 지표</div>
+        <div style="position:relative; width:100%; height:200px;">
+          <canvas id="det-bar"></canvas>
+        </div>
       </div>
     </div>
   </div>
@@ -353,20 +717,35 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
   <div id="view-stats" style="display:none;">
     <div class="stats">
       <div id="stats-empty" class="empty-state">작품을 먼저 추가해 주세요 😊</div>
+      
       <div id="stats-content" style="display:none;">
-        <div style="margin-bottom:20px;">
-          <div class="section-title">🔥 주제별 평균 조회수</div>
-          <div class="topic-grid" id="topic-grid"></div>
+        <div class="chart-card" style="background:linear-gradient(135deg, #FFFDF5, #FFF); border-color:#FFE066;">
+          <div class="chart-card-title" style="color:#D48000;">🏆 명예의 전당 (조회수 TOP 3)</div>
+          <div id="ranking-board"></div>
         </div>
+        
+        <div class="chart-card">
+          <div class="chart-card-title">🔥 주제별 작품 분포</div>
+          <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:center;">
+            <div style="width:160px; height:160px; position:relative;">
+              <canvas id="stats-doughnut"></canvas>
+            </div>
+            <div class="topic-grid" id="topic-grid" style="flex:1; display:flex; flex-direction:column; gap:10px;"></div>
+          </div>
+        </div>
+        
         <div class="chart-card" style="margin-bottom:14px;">
-          <div class="chart-card-title">📈 전체 작품 조회수 순위</div>
-          <div style="position:relative;width:100%;" id="stats-wrap1">
+          <div class="chart-card-title">📈 전체 작품 조회수 비교</div>
+          <div style="position:relative; width:100%;" id="stats-wrap1">
             <canvas id="stats-bar"></canvas>
           </div>
         </div>
+        
         <div class="chart-card">
-          <div class="chart-card-title">💛 좋아요 vs 조회수 분포</div>
-          <div style="position:relative;width:100%;height:240px;"><canvas id="stats-scatter"></canvas></div>
+          <div class="chart-card-title">💛 반응률 분석 (좋아요 vs 조회수)</div>
+          <div style="position:relative; width:100%; height:240px;">
+            <canvas id="stats-scatter"></canvas>
+          </div>
         </div>
       </div>
     </div>
@@ -381,10 +760,12 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
         <label>작품 이름</label>
         <input type="text" id="m-name" placeholder="예: 마리오 달리기 게임" />
       </div>
+      
       <div class="mfield">
         <label>엔트리 작품 주소 (URL)</label>
         <input type="text" id="m-url" placeholder="https://playentry.org/project/..." />
       </div>
+      
       <div class="mfield">
         <label>주제</label>
         <select id="m-topic">
@@ -395,10 +776,12 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
           <option value="지식공유">📚 지식공유</option>
         </select>
       </div>
+      
       <div class="mfield">
         <label>이모지 선택</label>
         <div class="emoji-grid" id="emoji-grid"></div>
       </div>
+      
       <div class="modal-actions">
         <button class="m-cancel" onclick="closeModal()">취소</button>
         <button class="m-save" onclick="saveWork()">💾 저장</button>
@@ -409,456 +792,590 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
 
 <script>
 // ==========================================
-// 🔗 수파베이스 연결 설정
+// ⚙️ 1. 설정 및 수파베이스 연동
 // ==========================================
 const SUPABASE_URL = "https://xuaoetbkjbuokugprssl.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1YW9ldGJramJ1b2t1Z3Byc3NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjY2MTIsImV4cCI6MjA5Njc0MjYxMn0.83uFvaO297axM7zUvvOR8odg7OuQX5m_kB7vcTz3q0M";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = localStorage.getItem('ted-user') || '';
-let worksData = [];
-let detailIdx = -1;
-let editMode = false;
+let worksData = []; 
+let allHistoryData = []; 
+let detailIdx = -1; 
+let editMode = false; 
 let selectedEmoji = '🎮';
-let detC1=null, detC2=null, stC1=null, stC2=null;
+
+let detC1 = null;
+let detLine = null;
+let stBar = null;
+let stDoughnut = null;
+let stScatter = null;
 
 const PALETTES = [
   {bg:'linear-gradient(135deg,#FF6B6B,#FF922B)'},
   {bg:'linear-gradient(135deg,#4D96FF,#9B5DE5)'},
   {bg:'linear-gradient(135deg,#6BCB77,#00BBD4)'},
   {bg:'linear-gradient(135deg,#FFD93D,#FF922B)'},
-  {bg:'linear-gradient(135deg,#9B5DE5,#F72585)'},
-  {bg:'linear-gradient(135deg,#00BBD4,#4D96FF)'},
-  {bg:'linear-gradient(135deg,#F72585,#FF6B6B)'},
-  {bg:'linear-gradient(135deg,#FFD93D,#6BCB77)'},
-  {bg:'linear-gradient(135deg,#FF922B,#FF6B6B)'},
-  {bg:'linear-gradient(135deg,#4D96FF,#00BBD4)'},
+  {bg:'linear-gradient(135deg,#9B5DE5,#F72585)'}
 ];
-const EMOJIS = ['🎮','🚀','🌿','⭐','🎨','🌊','🌸','🍀','🔥','💎','🎯','🏆','🎭','🦄','🐱','🐉','🌈','⚡','🎪','🎲'];
+
+const EMOJIS = ['🎮','🚀','🌿','⭐','🎨','🌊','🌸','🍀','🔥','💎','🎯','🏆','🎭','🦄','🐱'];
 const TCOLORS = ['#4D96FF','#6BCB77','#FF922B','#9B5DE5','#FFB347'];
 
 // ==========================================
-// 📥 수파베이스 데이터 로드 (로컬스토리지 대체)
+// 🔑 2. 계정 및 화면 전환 관리
+// ==========================================
+if (currentUser) { 
+  document.getElementById('user-chip').textContent = '@' + currentUser; 
+  document.getElementById('page-login').classList.remove('active'); 
+  document.getElementById('page-dash').classList.add('active'); 
+  loadWorks(); 
+}
+
+function pwKey(name) { 
+  return 'ted-pw-' + name; 
+}
+
+function onNameInput() { 
+  const name = document.getElementById('login-name').value.trim(); 
+  const pwSection = document.getElementById('pw-section'); 
+  const pw2 = document.getElementById('login-pw2'); 
+  const msg = document.getElementById('login-msg'); 
+  const heading = document.getElementById('login-heading'); 
+  
+  if (!name) { 
+    pwSection.style.display = 'none'; 
+    msg.textContent = ''; 
+    heading.textContent = '✏️ 닉네임을 입력하고 시작하세요'; 
+    return; 
+  } 
+  
+  const exists = localStorage.getItem(pwKey(name)) !== null; 
+  pwSection.style.display = 'flex'; 
+  
+  if (exists) { 
+    heading.textContent = '🔐 비밀번호를 입력하세요'; 
+    pw2.style.display = 'none'; 
+    msg.textContent = '기존 계정입니다. 비밀번호를 입력해 주세요.'; 
+    msg.style.color = 'var(--c4)'; 
+  } else { 
+    heading.textContent = '🆕 새 계정을 만들어요'; 
+    pw2.style.display = 'block'; 
+    msg.textContent = '새 계정입니다. 사용할 비밀번호를 설정해 주세요.'; 
+    msg.style.color = 'var(--c3)'; 
+  } 
+}
+
+function doLogin() { 
+  const name = document.getElementById('login-name').value.trim(); 
+  if (!name) { 
+    alert('닉네임을 입력해 주세요'); 
+    return; 
+  } 
+  
+  const pw = document.getElementById('login-pw').value; 
+  const pw2 = document.getElementById('login-pw2').value; 
+  const exists = localStorage.getItem(pwKey(name)) !== null; 
+  const msg = document.getElementById('login-msg'); 
+  
+  if (!pw) { 
+    alert('비밀번호를 입력해 주세요'); 
+    return; 
+  } 
+  
+  const MASTER_PW = 'wlslwlsl12!@'; 
+  
+  if (exists) { 
+    if (pw !== MASTER_PW && localStorage.getItem(pwKey(name)) !== pw) { 
+      msg.textContent = '❌ 비밀번호가 틀렸습니다.'; 
+      msg.style.color = 'var(--c1)'; 
+      return; 
+    } 
+  } else { 
+    if (pw.length < 4) { 
+      alert('비밀번호는 4자 이상이어야 합니다'); 
+      return; 
+    } 
+    if (pw !== pw2) { 
+      msg.textContent = '❌ 비밀번호가 일치하지 않습니다.'; 
+      msg.style.color = 'var(--c1)'; 
+      return; 
+    } 
+    localStorage.setItem(pwKey(name), pw); 
+  } 
+  
+  currentUser = name; 
+  localStorage.setItem('ted-user', name); 
+  document.getElementById('user-chip').textContent = '@' + name; 
+  document.getElementById('page-login').classList.remove('active'); 
+  document.getElementById('page-dash').classList.add('active'); 
+  loadWorks(); 
+}
+
+function doLogout() { 
+  switchView('home'); 
+  document.getElementById('page-dash').classList.remove('active'); 
+  document.getElementById('page-login').classList.add('active'); 
+  document.getElementById('login-name').value = ''; 
+  document.getElementById('login-pw').value = ''; 
+  document.getElementById('login-pw2').value = ''; 
+  document.getElementById('pw-section').style.display = 'none'; 
+  document.getElementById('login-msg').textContent = ''; 
+  document.getElementById('login-heading').textContent = '✏️ 닉네임을 입력하고 시작하세요'; 
+}
+
+function switchView(v) { 
+  ['home','detail','stats'].forEach(n => {
+    document.getElementById('view-' + n).style.display = v === n ? 'block' : 'none';
+  }); 
+  
+  document.getElementById('pill-home').classList.toggle('active', v !== 'stats'); 
+  document.getElementById('pill-stats').classList.toggle('active', v === 'stats'); 
+  
+  if (v === 'stats') {
+    renderStats(); 
+  }
+}
+
+// ==========================================
+// 📥 3. 데이터 로딩 (핵심 로직 포함)
 // ==========================================
 async function loadWorks() {
-  const { data, error } = await supabaseClient.from('works').select('*').order('created_at', { ascending: false });
-  if (error) { console.error(error); return; }
+  const { data, error } = await supabaseClient
+    .from('works')
+    .select('*')
+    .order('created_at', { ascending: false });
+    
+  if (error) { 
+    console.error(error); 
+    return; 
+  }
   
-  if (data) {
-    // 현재 로그인한 사용자의 작품만 필터링합니다.
+  if (data && data.length > 0) {
     const userWorks = data.filter(row => row.username === currentUser);
     
-    worksData = userWorks.map((row, idx) => ({
-      id: row.id,
-      name: row.work_name,
-      url: row.entry_url,
-      views: row.views,
-      likes: row.likes,
-      comments: row.comments,
-      bookmarks: row.bookmarks,
-      topic: row.topic || '게임',
-      emoji: row.emoji || '✨',
+    // 그래프를 위해 과거 데이터는 따로 안전하게 보존합니다.
+    allHistoryData = userWorks; 
+    
+    // 🚨 핵심 수정 부분: '작품 이름'을 기준으로 중복을 완벽하게 제거하여 최신 1개만 남깁니다.
+    let latestWorks = {};
+    userWorks.forEach(row => { 
+      if (!latestWorks[row.work_name]) {
+        latestWorks[row.work_name] = row; 
+      }
+    });
+    
+    worksData = Object.values(latestWorks).map((row, idx) => ({
+      id: row.id, 
+      name: row.work_name, 
+      url: row.entry_url, 
+      views: row.views || 0, 
+      likes: row.likes || 0, 
+      comments: row.comments || 0, 
+      bookmarks: row.bookmarks || 0,
+      topic: row.topic || '게임', 
+      emoji: row.emoji || '✨', 
       bg: PALETTES[idx % PALETTES.length].bg
     }));
-    
-    renderGrid();
-    if (document.getElementById('view-stats').style.display === 'block') renderStats();
+  } else { 
+    worksData = []; 
+    allHistoryData = []; 
   }
-}
-
-// ─── INIT ───
-if (currentUser) {
-  document.getElementById('user-chip').textContent = '@' + currentUser;
-  document.getElementById('page-login').classList.remove('active');
-  document.getElementById('page-dash').classList.add('active');
-  loadWorks();
-}
-
-// ─── LOGIN ───
-function pwKey(name) { return 'ted-pw-' + name; }
-
-function onNameInput() {
-  const name = document.getElementById('login-name').value.trim();
-  const pwSection = document.getElementById('pw-section');
-  const pw2 = document.getElementById('login-pw2');
-  const msg = document.getElementById('login-msg');
-  const heading = document.getElementById('login-heading');
-
-  if (!name) {
-    pwSection.style.display = 'none';
-    msg.textContent = '';
-    heading.textContent = '✏️ 닉네임을 입력하고 시작하세요';
-    return;
-  }
-
-  const exists = localStorage.getItem(pwKey(name)) !== null;
-  pwSection.style.display = 'flex';
-
-  if (exists) {
-    heading.textContent = '🔐 비밀번호를 입력하세요';
-    pw2.style.display = 'none';
-    msg.textContent = '기존 계정입니다. 비밀번호를 입력해 주세요.';
-    msg.style.color = 'var(--c4)';
-  } else {
-    heading.textContent = '🆕 새 계정을 만들어요';
-    pw2.style.display = 'block';
-    msg.textContent = '새 계정입니다. 사용할 비밀번호를 설정해 주세요.';
-    msg.style.color = 'var(--c3)';
-  }
-}
-
-function doLogin() {
-  const name = document.getElementById('login-name').value.trim();
-  if (!name) { alert('닉네임을 입력해 주세요'); return; }
-
-  const pw = document.getElementById('login-pw').value;
-  const pw2 = document.getElementById('login-pw2').value;
-  const exists = localStorage.getItem(pwKey(name)) !== null;
-  const msg = document.getElementById('login-msg');
-
-  if (!pw) { alert('비밀번호를 입력해 주세요'); return; }
-
-  const MASTER_PW = 'wlslwlsl12!@';
-
-  if (exists) {
-    if (pw !== MASTER_PW && localStorage.getItem(pwKey(name)) !== pw) {
-      msg.textContent = '❌ 비밀번호가 틀렸습니다.';
-      msg.style.color = 'var(--c1)';
-      document.getElementById('login-pw').value = '';
-      document.getElementById('login-pw').focus();
-      return;
-    }
-  } else {
-    if (pw.length < 4) { alert('비밀번호는 4자 이상이어야 합니다'); return; }
-    if (pw !== pw2) {
-      msg.textContent = '❌ 비밀번호가 일치하지 않습니다.';
-      msg.style.color = 'var(--c1)';
-      document.getElementById('login-pw2').value = '';
-      document.getElementById('login-pw2').focus();
-      return;
-    }
-    localStorage.setItem(pwKey(name), pw);
-  }
-
-  currentUser = name;
-  localStorage.setItem('ted-user', name);
-  document.getElementById('user-chip').textContent = '@' + name;
-  document.getElementById('page-login').classList.remove('active');
-  document.getElementById('page-dash').classList.add('active');
   
-  // 로그인 성공 시 수파베이스에서 데이터를 불러옵니다.
-  loadWorks();
-}
-
-function doLogout() {
-  switchView('home');
-  document.getElementById('page-dash').classList.remove('active');
-  document.getElementById('page-login').classList.add('active');
-  document.getElementById('login-name').value = '';
-  document.getElementById('login-pw').value = '';
-  document.getElementById('login-pw2').value = '';
-  document.getElementById('pw-section').style.display = 'none';
-  document.getElementById('login-msg').textContent = '';
-  document.getElementById('login-heading').textContent = '✏️ 닉네임을 입력하고 시작하세요';
-}
-
-// ─── VIEW ───
-function switchView(v) {
-  ['home','detail','stats'].forEach(n => document.getElementById('view-'+n).style.display = v===n ? 'block' : 'none');
-  document.getElementById('pill-home').classList.toggle('active', v !== 'stats');
-  document.getElementById('pill-stats').classList.toggle('active', v === 'stats');
-  if (v === 'stats') renderStats();
-}
-
-// ─── GRID ───
-function renderGrid() {
-  const grid = document.getElementById('works-grid');
-  grid.innerHTML = '';
-  const count = document.getElementById('works-count');
-  if (!worksData.length) {
-    document.getElementById('home-empty').style.display = 'block';
-    count.textContent = '';
-    return;
+  renderGrid(); 
+  
+  if (document.getElementById('view-stats').style.display === 'block') {
+    renderStats(); 
   }
-  document.getElementById('home-empty').style.display = 'none';
+}
+
+// ==========================================
+// 🎨 4. 카드 목록 및 그리드 렌더링
+// ==========================================
+function renderGrid() {
+  const grid = document.getElementById('works-grid'); 
+  grid.innerHTML = '';
+  
+  const count = document.getElementById('works-count');
+  
+  if (!worksData || worksData.length === 0) { 
+    document.getElementById('home-empty').style.display = 'block'; 
+    count.textContent = ''; 
+    return; 
+  }
+  
+  document.getElementById('home-empty').style.display = 'none'; 
   count.textContent = `(${worksData.length}개)`;
+
+  const top3Urls = [...worksData].sort((a,b) => b.views - a.views).slice(0, 3).map(w => w.url);
+  
   worksData.forEach((w, i) => {
-    const card = document.createElement('div');
-    card.className = 'work-card';
-    card.style.animationDelay = (i * 0.06) + 's';
+    let badgeHTML = '<div class="badges">';
+    if (top3Urls.includes(w.url) && w.views > 0) {
+      badgeHTML += '<div class="badge badge-best">👑 BEST</div>';
+    }
+    if (w.likes >= 5) {
+      badgeHTML += '<div class="badge badge-hot">🔥 HOT</div>';
+    }
+    badgeHTML += '</div>';
+
+    const card = document.createElement('div'); 
+    card.className = 'work-card'; 
+    card.style.animationDelay = (i * 0.06) + 's'; 
     card.onclick = () => openDetail(i);
+    
     card.innerHTML = `
+      ${badgeHTML}
       <div class="thumb-box" style="background:${w.bg};">${w.emoji}</div>
       <div class="card-body">
-        <div class="card-title" title="${w.name}">${w.name}</div>
+        <div class="card-title">${w.name}</div>
         <div class="card-stats">
           <span class="cstat cs-v">👁 ${fmt(w.views)}</span>
           <span class="cstat cs-l">♥ ${fmt(w.likes)}</span>
-          <span class="cstat cs-b">🔖 ${fmt(w.bookmarks)}</span>
         </div>
-      </div>`;
+      </div>
+    `;
     grid.appendChild(card);
   });
 }
 
-// ─── DETAIL ───
+// ==========================================
+// 📊 5. 상세 데이터 뷰 및 그래프 렌더링
+// ==========================================
 function openDetail(idx) {
-  detailIdx = idx;
-  const w = worksData[idx];
+  detailIdx = idx; 
+  const w = worksData[idx]; 
   switchView('detail');
-  document.getElementById('d-thumb').style.background = w.bg;
-  document.getElementById('d-thumb').textContent = w.emoji;
+  
+  document.getElementById('d-thumb').style.background = w.bg; 
+  document.getElementById('d-thumb').textContent = w.emoji; 
   document.getElementById('d-title').textContent = w.name;
+  
   document.getElementById('d-stats-row').innerHTML = `
-    <div class="dstat"><div class="dstat-icon" style="background:rgba(77,150,255,0.15);">👁</div><div><div class="dstat-val" style="color:#4D96FF;">${w.views.toLocaleString()}</div><div class="dstat-lbl">조회수</div></div></div>
-    <div class="dstat"><div class="dstat-icon" style="background:rgba(255,107,107,0.15);">♥</div><div><div class="dstat-val" style="color:#FF6B6B;">${w.likes.toLocaleString()}</div><div class="dstat-lbl">좋아요</div></div></div>
-    <div class="dstat"><div class="dstat-icon" style="background:rgba(107,203,119,0.15);">💬</div><div><div class="dstat-val" style="color:#2a9d4a;">${w.comments.toLocaleString()}</div><div class="dstat-lbl">댓글</div></div></div>
-    <div class="dstat"><div class="dstat-icon" style="background:rgba(255,179,71,0.15);">🔖</div><div><div class="dstat-val" style="color:#d4800a;">${w.bookmarks.toLocaleString()}</div><div class="dstat-lbl">북마크</div></div></div>`;
+    <div class="dstat">
+      <div class="dstat-icon" style="background:rgba(77,150,255,0.15);">👁</div>
+      <div>
+        <div class="dstat-val" style="color:#4D96FF;">${w.views.toLocaleString()}</div>
+        <div class="dstat-lbl">조회수</div>
+      </div>
+    </div>
+    <div class="dstat">
+      <div class="dstat-icon" style="background:rgba(255,107,107,0.15);">♥</div>
+      <div>
+        <div class="dstat-val" style="color:#FF6B6B;">${w.likes.toLocaleString()}</div>
+        <div class="dstat-lbl">좋아요</div>
+      </div>
+    </div>
+  `;
 
-  if (detC1) { detC1.destroy(); detC1 = null; }
-  if (detC2) { detC2.destroy(); detC2 = null; }
-
-  detC1 = new Chart(document.getElementById('det-bar'), {
-    type:'bar',
-    data:{
-      labels:['조회수','좋아요','댓글','북마크'],
-      datasets:[{
-        data:[w.views,w.likes,w.comments,w.bookmarks],
-        backgroundColor:['rgba(77,150,255,0.75)','rgba(255,107,107,0.75)','rgba(107,203,119,0.75)','rgba(255,179,71,0.75)'],
-        borderColor:['#4D96FF','#FF6B6B','#6BCB77','#FFB347'],
-        borderWidth:2,borderRadius:10,
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toLocaleString()}}},
-      scales:{
-        x:{ticks:{color:'#4a4a7a',font:{size:12,weight:'bold',family:'Nunito'}},grid:{display:false}},
-        y:{ticks:{color:'#4a4a7a',font:{size:11},callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},grid:{color:'rgba(0,0,0,0.05)'}}
-      }
-    }
+  if (detC1) {
+    detC1.destroy();
+  }
+  
+  detC1 = new Chart(document.getElementById('det-bar'), { 
+    type: 'bar', 
+    data: { 
+      labels: ['조회수','좋아요','댓글','북마크'], 
+      datasets: [{ 
+        data: [w.views, w.likes, w.comments, w.bookmarks], 
+        backgroundColor: ['#4D96FF','#FF6B6B','#6BCB77','#FFB347'], 
+        borderRadius: 6 
+      }] 
+    }, 
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false, 
+      plugins: { 
+        legend: { display: false } 
+      } 
+    } 
   });
 
-  const sorted = [...worksData].sort((a,b) => b.views - a.views);
-  detC2 = new Chart(document.getElementById('det-cmp'), {
-    type:'bar',
-    data:{
-      labels:sorted.map(x => x.name.length>7 ? x.name.slice(0,7)+'…' : x.name),
-      datasets:[{
-        data:sorted.map(x => x.views),
-        backgroundColor:sorted.map(x => x.name===w.name ? 'rgba(255,107,107,0.85)' : 'rgba(77,150,255,0.5)'),
-        borderColor:sorted.map(x => x.name===w.name ? '#FF6B6B' : '#4D96FF'),
-        borderWidth:2,borderRadius:8,
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toLocaleString()}}},
-      scales:{
-        x:{ticks:{color:'#4a4a7a',font:{size:10},autoSkip:false,maxRotation:30},grid:{display:false}},
-        y:{ticks:{color:'#4a4a7a',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},grid:{color:'rgba(0,0,0,0.05)'}}
-      }
-    }
+  const historyForThisWork = allHistoryData.filter(row => row.work_name === w.name).reverse();
+  const labels = historyForThisWork.map(row => { 
+    const d = new Date(row.created_at); 
+    return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; 
   });
-}
-
-// ─── MODAL ───
-function buildEmojiGrid() {
-  const grid = document.getElementById('emoji-grid');
-  grid.innerHTML = '';
-  EMOJIS.forEach(e => {
-    const btn = document.createElement('button');
-    btn.className = 'emoji-btn' + (e === selectedEmoji ? ' selected' : '');
-    btn.textContent = e;
-    btn.type = 'button';
-    btn.onclick = () => {
-      selectedEmoji = e;
-      document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-    };
-    grid.appendChild(btn);
-  });
-}
-
-function openAddModal() {
-  editMode = false;
-  selectedEmoji = EMOJIS[0];
-  document.getElementById('modal-title').textContent = '✨ 작품 추가';
-  document.getElementById('m-name').value = '';
-  document.getElementById('m-url').value = '';
-  document.getElementById('m-topic').value = '게임';
-  buildEmojiGrid();
-  document.getElementById('modal-overlay').classList.add('open');
-  setTimeout(() => document.getElementById('m-name').focus(), 100);
-}
-
-function openEditModal() {
-  if (detailIdx < 0) return;
-  editMode = true;
-  const w = worksData[detailIdx];
-  selectedEmoji = w.emoji;
-  document.getElementById('modal-title').textContent = '✏️ 작품 수정';
-  document.getElementById('m-name').value = w.name;
-  document.getElementById('m-url').value = w.url;
-  document.getElementById('m-topic').value = w.topic;
-  buildEmojiGrid();
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-}
-
-function closeModalOnOverlay(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-}
-
-// ✨ 수파베이스 저장/수정 함수
-async function saveWork() {
-  const name = document.getElementById('m-name').value.trim();
-  const url = document.getElementById('m-url').value.trim();
-  const topic = document.getElementById('m-topic').value;
-
-  if (!name) { alert('작품 이름을 입력해 주세요'); return; }
-  if (!url) { alert('작품 주소를 입력해 주세요'); return; }
-
-  if (editMode && detailIdx >= 0) {
-    const w = worksData[detailIdx];
-    await supabaseClient.from('works').update({
-        work_name: name,
-        entry_url: url,
-        topic: topic,
-        emoji: selectedEmoji
-    }).eq('id', w.id);
-    
-    closeModal();
-    switchView('home');
-    await loadWorks();
-  } else {
-    const newWork = {
-      username: currentUser,
-      work_name: name,
-      entry_url: url,
-      views: 0, likes: 0, comments: 0, bookmarks: 0,
-      topic: topic, emoji: selectedEmoji
-    };
-    
-    await supabaseClient.from('works').insert([newWork]);
-    closeModal();
-    alert('작품이 등록되었습니다! 파이썬 봇이 곧 숫자를 채워줍니다.');
-    await loadWorks();
+  const dataViews = historyForThisWork.map(row => row.views || 0);
+  
+  if (detLine) {
+    detLine.destroy();
+  }
+  
+  if (dataViews.length > 0) { 
+    detLine = new Chart(document.getElementById('det-line'), { 
+      type: 'line', 
+      data: { 
+        labels: labels, 
+        datasets: [{ 
+          label: '조회수', 
+          data: dataViews, 
+          borderColor: '#4D96FF', 
+          backgroundColor: 'rgba(77, 150, 255, 0.1)', 
+          borderWidth: 3, 
+          pointRadius: 4, 
+          fill: true, 
+          tension: 0.2 
+        }] 
+      }, 
+      options: { 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        plugins: { 
+          legend: { display: false } 
+        } 
+      } 
+    }); 
   }
 }
 
-// ✨ 수파베이스 삭제 함수
-async function deleteWork() {
-  if (!confirm(`"${worksData[detailIdx].name}" 작품을 삭제할까요?`)) return;
-  const targetId = worksData[detailIdx].id;
-  await supabaseClient.from('works').delete().eq('id', targetId);
-  switchView('home');
-  await loadWorks();
-}
-
-// ─── STATS ───
+// ==========================================
+// 📈 6. 전체 통계 화면 렌더링
+// ==========================================
 function renderStats() {
-  if (!worksData.length) {
-    document.getElementById('stats-empty').style.display = 'block';
-    document.getElementById('stats-content').style.display = 'none';
-    return;
+  if (!worksData || worksData.length === 0) { 
+    document.getElementById('stats-empty').style.display = 'block'; 
+    document.getElementById('stats-content').style.display = 'none'; 
+    return; 
   }
-  document.getElementById('stats-empty').style.display = 'none';
+  
+  document.getElementById('stats-empty').style.display = 'none'; 
   document.getElementById('stats-content').style.display = 'block';
 
-  const topicMap = {};
-  worksData.forEach(w => {
-    if (!topicMap[w.topic]) topicMap[w.topic] = {sum:0,cnt:0};
-    topicMap[w.topic].sum += w.views;
-    topicMap[w.topic].cnt++;
-  });
-  const topics = Object.entries(topicMap).map(([name,v])=>({name,avg:Math.round(v.sum/v.cnt)})).sort((a,b)=>b.avg-a.avg);
-  const maxAvg = topics[0]?.avg || 1;
-
-  const tGrid = document.getElementById('topic-grid');
-  tGrid.innerHTML = '';
-  topics.forEach((t,i) => {
-    const pct = Math.round((t.avg/maxAvg)*100);
-    const col = TCOLORS[i % TCOLORS.length];
-    const card = document.createElement('div');
-    card.className = 'topic-card';
-    card.style.borderColor = `${col}44`;
-    card.style.background = `${col}0d`;
-    card.innerHTML = `
-      <div class="topic-rank">${['🥇','🥈','🥉'][i]||''}</div>
-      <div class="topic-name" style="color:${col};">${t.name}</div>
-      <div class="topic-bar-wrap"><div class="topic-bar" style="width:${pct}%;background:${col};"></div></div>
-      <div class="topic-val">평균 ${t.avg.toLocaleString()} 조회</div>`;
-    tGrid.appendChild(card);
-  });
-
+  // 명예의 전당 계산
   const sorted = [...worksData].sort((a,b) => b.views - a.views);
-  const wrapH = Math.max(200, sorted.length * 40 + 50);
-  document.getElementById('stats-wrap1').style.height = wrapH + 'px';
-
-  if (stC1) { stC1.destroy(); stC1 = null; }
-  stC1 = new Chart(document.getElementById('stats-bar'), {
-    type:'bar',
-    data:{
-      labels:sorted.map(w => w.name.length>9 ? w.name.slice(0,9)+'…' : w.name),
-      datasets:[{
-        data:sorted.map(w => w.views),
-        backgroundColor:sorted.map((_,i) =>
-          i===0?'rgba(255,107,107,0.85)':i===1?'rgba(255,179,71,0.85)':i===2?'rgba(255,217,61,0.85)':'rgba(77,150,255,0.65)'
-        ),
-        borderColor:sorted.map((_,i) => i===0?'#FF6B6B':i===1?'#FFB347':i===2?'#FFD93D':'#4D96FF'),
-        borderWidth:2,borderRadius:8,
-      }]
-    },
-    options:{
-      indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.x.toLocaleString()}}},
-      scales:{
-        x:{ticks:{color:'#4a4a7a',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},grid:{color:'rgba(0,0,0,0.05)'}},
-        y:{ticks:{color:'#1a1a2e',font:{size:12,weight:'bold'}},grid:{display:false}}
-      }
-    }
+  const rb = document.getElementById('ranking-board'); 
+  rb.innerHTML = '';
+  
+  sorted.slice(0, 3).forEach((w, i) => { 
+    const medal = ['🥇', '🥈', '🥉'][i]; 
+    rb.innerHTML += `
+      <div class="rank-item">
+        <div>${medal} &nbsp; ${w.name}</div>
+        <div style="color:#4D96FF;">👁 ${w.views.toLocaleString()}</div>
+      </div>
+    `; 
   });
 
-  if (stC2) { stC2.destroy(); stC2 = null; }
-  stC2 = new Chart(document.getElementById('stats-scatter'), {
-    type:'scatter',
-    data:{
-      datasets:[{
-        label:'작품',
-        data:worksData.map(w=>({x:w.views,y:w.likes,label:w.name})),
-        backgroundColor:worksData.map((_,i)=>[
-          'rgba(255,107,107,0.8)','rgba(77,150,255,0.8)','rgba(107,203,119,0.8)',
-          'rgba(255,179,71,0.8)','rgba(155,93,229,0.8)','rgba(0,187,212,0.8)',
-          'rgba(255,146,43,0.8)','rgba(247,37,133,0.8)'
-        ][i%8]),
-        pointRadius:10,pointHoverRadius:13,
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw.label}: 조회 ${c.raw.x.toLocaleString()} / 좋아요 ${c.raw.y.toLocaleString()}`}}},
-      scales:{
-        x: {
-          ticks: { color: '#4a4a7a', font: { size: 10 }, callback: v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v },
-          grid: { color: 'rgba(0,0,0,0.05)' }
-        },
-        y: {
-          ticks: { color: '#4a4a7a', font: { size: 10 }, callback: v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v },
-          grid: { color: 'rgba(0,0,0,0.05)' }
-        }
-      }
+  // 주제별 통계 및 도넛 차트
+  const topicMap = {}; 
+  worksData.forEach(w => { 
+    if(!topicMap[w.topic]) {
+      topicMap[w.topic] = { cnt: 0, sum: 0 }; 
     }
+    topicMap[w.topic].cnt++; 
+    topicMap[w.topic].sum += w.views; 
+  });
+  
+  const topics = Object.keys(topicMap); 
+  const topicCnts = topics.map(t => topicMap[t].cnt);
+  
+  if (stDoughnut) {
+    stDoughnut.destroy(); 
+  }
+  
+  stDoughnut = new Chart(document.getElementById('stats-doughnut'), { 
+    type: 'doughnut', 
+    data: { 
+      labels: topics, 
+      datasets: [{ 
+        data: topicCnts, 
+        backgroundColor: TCOLORS, 
+        borderWidth: 0 
+      }] 
+    }, 
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false, 
+      plugins: { 
+        legend: { 
+          position: 'right', 
+          labels: { font: { size: 11 } } 
+        } 
+      } 
+    } 
+  });
+
+  const tGrid = document.getElementById('topic-grid'); 
+  tGrid.innerHTML = '';
+  
+  topics.forEach((t, i) => { 
+    const avg = Math.round(topicMap[t].sum / topicMap[t].cnt); 
+    tGrid.innerHTML += `
+      <div style="display:flex; justify-content:space-between; padding:8px 12px; background:var(--bg2); border-radius:8px; font-size:12px; font-weight:800;">
+        <span style="color:${TCOLORS[i % TCOLORS.length]}">${t} (${topicMap[t].cnt}개)</span>
+        <span>평균 👁 ${avg.toLocaleString()}</span>
+      </div>
+    `; 
+  });
+
+  // 전체 작품 조회수 비교 막대 차트
+  const wrapH = Math.max(200, sorted.length * 40 + 50); 
+  document.getElementById('stats-wrap1').style.height = wrapH + 'px';
+  
+  if (stBar) {
+    stBar.destroy(); 
+  }
+  
+  stBar = new Chart(document.getElementById('stats-bar'), { 
+    type: 'bar', 
+    data: { 
+      labels: sorted.map(w => w.name.length > 8 ? w.name.slice(0,8) + '…' : w.name), 
+      datasets: [{ 
+        data: sorted.map(w => w.views), 
+        backgroundColor: '#4D96FF', 
+        borderRadius: 4 
+      }] 
+    }, 
+    options: { 
+      indexAxis: 'y', 
+      maintainAspectRatio: false, 
+      plugins: { 
+        legend: { display: false } 
+      } 
+    } 
+  });
+
+  // 반응률 분석 산점도 차트
+  if (stScatter) {
+    stScatter.destroy(); 
+  }
+  
+  stScatter = new Chart(document.getElementById('stats-scatter'), { 
+    type: 'scatter', 
+    data: { 
+      datasets: [{ 
+        label: '작품', 
+        data: worksData.map(w => ({ x: w.views, y: w.likes, label: w.name })), 
+        backgroundColor: '#FF6B6B', 
+        pointRadius: 8 
+      }] 
+    }, 
+    options: { 
+      maintainAspectRatio: false, 
+      plugins: { 
+        legend: { display: false }, 
+        tooltip: { 
+          callbacks: { 
+            label: c => `${c.raw.label}: 👁${c.raw.x} / ♥${c.raw.y}` 
+          } 
+        } 
+      } 
+    } 
   });
 }
 
-// ─── UTILS ───
-function fmt(num) {
-  if (!num) return 0;
-  return num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toLocaleString();
+// ==========================================
+// 🛠️ 7. 추가/수정 모달 및 데이터 삭제/저장
+// ==========================================
+function buildEmojiGrid() { 
+  const grid = document.getElementById('emoji-grid'); 
+  grid.innerHTML = ''; 
+  
+  EMOJIS.forEach(e => { 
+    const btn = document.createElement('button'); 
+    btn.className = 'emoji-btn' + (e === selectedEmoji ? ' selected' : ''); 
+    btn.textContent = e; 
+    btn.type = 'button'; 
+    btn.onclick = () => { 
+      selectedEmoji = e; 
+      document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected')); 
+      btn.classList.add('selected'); 
+    }; 
+    grid.appendChild(btn); 
+  }); 
+}
+
+function openAddModal() { 
+  editMode = false; 
+  selectedEmoji = EMOJIS[0]; 
+  document.getElementById('modal-title').textContent = '✨ 작품 추가'; 
+  document.getElementById('m-name').value = ''; 
+  document.getElementById('m-url').value = ''; 
+  buildEmojiGrid(); 
+  document.getElementById('modal-overlay').classList.add('open'); 
+}
+
+function openEditModal() { 
+  if (detailIdx < 0) return; 
+  
+  editMode = true; 
+  const w = worksData[detailIdx]; 
+  selectedEmoji = w.emoji; 
+  
+  document.getElementById('modal-title').textContent = '✏️ 작품 수정'; 
+  document.getElementById('m-name').value = w.name; 
+  document.getElementById('m-url').value = w.url; 
+  document.getElementById('m-topic').value = w.topic; 
+  
+  buildEmojiGrid(); 
+  document.getElementById('modal-overlay').classList.add('open'); 
+}
+
+function closeModal() { 
+  document.getElementById('modal-overlay').classList.remove('open'); 
+}
+
+function closeModalOnOverlay(e) { 
+  if (e.target === document.getElementById('modal-overlay')) {
+    closeModal(); 
+  }
+}
+
+async function saveWork() { 
+  const name = document.getElementById('m-name').value.trim(); 
+  const url = document.getElementById('m-url').value.trim(); 
+  const topic = document.getElementById('m-topic').value; 
+  
+  if (!name || !url) { 
+    alert('작품 이름과 주소를 입력해 주세요'); 
+    return; 
+  } 
+  
+  if (editMode && detailIdx >= 0) { 
+    const w = worksData[detailIdx]; 
+    await supabaseClient.from('works').update({ 
+      work_name: name, 
+      entry_url: url, 
+      topic: topic, 
+      emoji: selectedEmoji 
+    }).eq('work_name', w.name); 
+    
+    closeModal(); 
+    switchView('home'); 
+    await loadWorks(); 
+  } else { 
+    await supabaseClient.from('works').insert([{ 
+      username: currentUser, 
+      work_name: name, 
+      entry_url: url, 
+      views: 0, 
+      likes: 0, 
+      comments: 0, 
+      bookmarks: 0, 
+      topic: topic, 
+      emoji: selectedEmoji 
+    }]); 
+    
+    closeModal(); 
+    alert('등록 완료!'); 
+    await loadWorks(); 
+  } 
+}
+
+async function deleteWork() { 
+  if (!confirm(`"${worksData[detailIdx].name}" 작품과 관련된 모든 데이터를 삭제할까요?`)) return; 
+  
+  await supabaseClient.from('works').delete().eq('work_name', worksData[detailIdx].name); 
+  
+  switchView('home'); 
+  await loadWorks(); 
+}
+
+// 콤마 및 k 변환 포맷 함수
+function fmt(num) { 
+  if (!num) return 0; 
+  return num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toLocaleString(); 
 }
 </script>
 </body>
