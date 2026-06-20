@@ -1,1382 +1,1482 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TED – The Entry Data</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-/* ==========================================
-   🎨 1. 기본 색상 및 폰트 설정
-========================================== */
-:root {
-  --c1: #FF6B6B; 
-  --c2: #FFB347; 
-  --c3: #6BCB77; 
-  --c4: #4D96FF; 
-  --c5: #FF922B; 
-  --c6: #9B5DE5; 
-  --c7: #00BBD4; 
-  --c8: #F72585;
-  --bg: #F5F7FF; 
-  --bg2: #EEF1FF; 
-  --bg3: #fff;
-  --card: #ffffff; 
-  --card2: #F8F9FF;
-  --text: #1a1a2e; 
-  --text2: #4a4a7a; 
-  --text3: #8888bb;
-  --border: #E0E4FF;
-  --radius: 16px; 
-  --radius-sm: 10px;
-  --shadow: 0 4px 20px rgba(77,150,255,0.10);
-  --shadow-hover: 0 8px 32px rgba(77,150,255,0.18);
-}
-
-* { 
-  box-sizing: border-box; 
-  margin: 0; 
-  padding: 0; 
-}
-
-body { 
-  font-family: 'Nunito', sans-serif; 
-  background: var(--bg); 
-  color: var(--text); 
-  min-height: 100vh; 
-}
-
-.page { 
-  display: none; 
-} 
-
-.page.active { 
-  display: block; 
-}
-
-/* 스크롤바 디자인 */
-::-webkit-scrollbar { 
-  width: 5px; 
-} 
-
-::-webkit-scrollbar-track { 
-  background: var(--bg2); 
-} 
-
-::-webkit-scrollbar-thumb { 
-  background: var(--c4); 
-  border-radius: 3px; 
-}
-
-/* ==========================================
-   🔐 2. 로그인 화면
-========================================== */
-.login-bg { 
-  min-height: 100vh; 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  justify-content: center; 
-  padding: 2rem 1rem; 
-  background: var(--bg); 
-  position: relative; 
-  overflow: hidden; 
-}
-
-.ted-logo { 
-  font-size: 64px; 
-  font-weight: 900; 
-  letter-spacing: -3px; 
-  background: linear-gradient(135deg, var(--c4), var(--c6), var(--c8)); 
-  -webkit-background-clip: text; 
-  -webkit-text-fill-color: transparent; 
-  margin-bottom: 4px; 
-}
-
-.ted-sub { 
-  font-size: 12px; 
-  color: var(--text3); 
-  letter-spacing: 4px; 
-  text-transform: uppercase; 
-  margin-bottom: 2rem; 
-  font-weight: 700; 
-}
-
-.login-card { 
-  background: var(--card); 
-  border: 1.5px solid var(--border); 
-  border-radius: var(--radius); 
-  padding: 2rem; 
-  width: 100%; 
-  max-width: 380px; 
-  box-shadow: var(--shadow); 
-}
-
-.login-card h2 { 
-  font-size: 15px; 
-  font-weight: 900; 
-  color: var(--text2); 
-  margin-bottom: 1.2rem; 
-}
-
-.lform { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 10px; 
-}
-
-.lform input { 
-  padding: 11px 14px; 
-  font-size: 14px; 
-  font-family: 'Nunito', sans-serif; 
-  font-weight: 600; 
-  border: 1.5px solid var(--border); 
-  border-radius: var(--radius-sm); 
-  background: var(--bg2); 
-  color: var(--text); 
-  outline: none; 
-}
-
-.lbtn { 
-  padding: 12px; 
-  font-size: 14px; 
-  font-weight: 800; 
-  border-radius: var(--radius-sm); 
-  cursor: pointer; 
-  border: none; 
-  color: #fff; 
-  background: linear-gradient(135deg, var(--c4), var(--c6)); 
-}
-
-/* ==========================================
-   📱 3. 대시보드 공통 (상단바 등)
-========================================== */
-.topbar { 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  padding: 12px 20px; 
-  background: var(--card); 
-  border-bottom: 1.5px solid var(--border); 
-  position: sticky; 
-  top: 0; 
-  z-index: 20; 
-  box-shadow: 0 2px 12px rgba(77,150,255,0.08); 
-}
-
-.ted-sm { 
-  font-size: 22px; 
-  font-weight: 900; 
-  cursor: pointer; 
-  background: linear-gradient(135deg, var(--c4), var(--c6)); 
-  -webkit-background-clip: text; 
-  -webkit-text-fill-color: transparent; 
-}
-
-.nav-pills { 
-  display: flex; 
-  gap: 6px; 
-} 
-
-.npill { 
-  font-size: 12px; 
-  font-weight: 800; 
-  padding: 6px 14px; 
-  border-radius: 20px; 
-  border: 1.5px solid var(--border); 
-  background: transparent; 
-  color: var(--text2); 
-  cursor: pointer; 
-} 
-
-.npill.active { 
-  background: linear-gradient(135deg, var(--c4), var(--c6)); 
-  color: #fff; 
-  border-color: transparent; 
-  box-shadow: 0 2px 10px rgba(77,150,255,0.3); 
-}
-
-.user-chip { 
-  font-size: 12px; 
-  font-weight: 800; 
-  color: var(--c4); 
-  background: rgba(77,150,255,0.1); 
-  border: 1.5px solid rgba(77,150,255,0.25); 
-  border-radius: 20px; 
-  padding: 5px 12px; 
-}
-
-.logout-btn { 
-  font-size: 12px; 
-  font-weight: 700; 
-  color: var(--text3); 
-  background: none; 
-  border: 1.5px solid var(--border); 
-  border-radius: 20px; 
-  cursor: pointer; 
-  padding: 5px 12px; 
-}
-
-.main, .detail, .stats { 
-  padding: 20px; 
-  max-width: 900px; 
-  margin: 0 auto; 
-}
-
-.add-bar { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  margin-bottom: 20px; 
-  flex-wrap: wrap; 
-  gap: 10px; 
-} 
-
-.add-bar-title { 
-  font-size: 14px; 
-  font-weight: 900; 
-  color: var(--text2); 
-}
-
-.add-btn { 
-  padding: 10px 20px; 
-  font-size: 13px; 
-  font-weight: 800; 
-  background: linear-gradient(135deg, var(--c4), var(--c6)); 
-  color: #fff; 
-  border: none; 
-  border-radius: var(--radius-sm); 
-  cursor: pointer; 
-  box-shadow: 0 4px 14px rgba(77,150,255,0.3); 
-}
-
-/* ==========================================
-   🖼️ 4. 작품 카드 그리드
-========================================== */
-.works-grid { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); 
-  gap: 14px; 
-} 
-
-.work-card { 
-  background: var(--card); 
-  border: 1.5px solid var(--border); 
-  border-radius: var(--radius); 
-  overflow: hidden; 
-  cursor: pointer; 
-  box-shadow: var(--shadow); 
-  position: relative; 
-  transition: transform 0.2s; 
-}
-
-.work-card:hover { 
-  transform: translateY(-5px); 
-  box-shadow: var(--shadow-hover); 
-  border-color: var(--c4); 
-}
-
-.badges { 
-  position: absolute; 
-  top: 8px; 
-  right: 8px; 
-  display: flex; 
-  gap: 4px; 
-  z-index: 10; 
-}
-
-.badge { 
-  font-size: 10px; 
-  font-weight: 900; 
-  padding: 4px 8px; 
-  border-radius: 12px; 
-  color: #fff; 
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2); 
-}
-
-.badge-best { 
-  background: linear-gradient(135deg, #FFD93D, #FF922B); 
-  color: #855E00; 
-  border: 1px solid rgba(255,255,255,0.5); 
-}
-
-.badge-hot { 
-  background: linear-gradient(135deg, #FF6B6B, #F72585); 
-}
-
-.thumb-box { 
-  width: 100%; 
-  height: 110px; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  font-size: 42px; 
-} 
-
-.card-body { 
-  padding: 10px 12px 12px; 
-} 
-
-.card-title { 
-  font-size: 13px; 
-  font-weight: 800; 
-  margin-bottom: 8px; 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-} 
-
-.card-stats { 
-  display: flex; 
-  gap: 8px; 
-  flex-wrap: wrap; 
-} 
-
-.cstat { 
-  display: flex; 
-  align-items: center; 
-  gap: 4px; 
-  font-size: 11px; 
-  font-weight: 700; 
-}
-
-.cs-v { color: #4D96FF; } 
-.cs-l { color: #FF6B6B; } 
-.cs-b { color: #FFB347; }
-
-/* ==========================================
-   🔍 5. 상세 페이지 & 통계 페이지
-========================================== */
-.back-btn { 
-  display: inline-flex; 
-  align-items: center; 
-  gap: 6px; 
-  font-size: 13px; 
-  font-weight: 800; 
-  border: 1.5px solid var(--border); 
-  border-radius: 20px; 
-  padding: 7px 16px; 
-  cursor: pointer; 
-  margin-bottom: 18px; 
-  background: var(--card); 
-  color: var(--text2); 
-}
-
-.detail-hero { 
-  border-radius: var(--radius); 
-  overflow: hidden; 
-  margin-bottom: 16px; 
-  box-shadow: var(--shadow); 
-  border: 1.5px solid var(--border); 
-} 
-
-.detail-hero-thumb { 
-  width: 100%; 
-  height: 150px; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  font-size: 64px; 
-}
-
-.detail-hero-info { 
-  background: var(--card); 
-  padding: 16px 20px; 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  flex-wrap: wrap; 
-  gap: 12px; 
-} 
-
-.detail-title { 
-  font-size: 18px; 
-  font-weight: 900; 
-  color: var(--text); 
-} 
-
-.detail-stats-row { 
-  display: flex; 
-  gap: 12px; 
-  flex-wrap: wrap; 
-} 
-
-.dstat { 
-  display: flex; 
-  align-items: center; 
-  gap: 6px; 
-} 
-
-.dstat-icon { 
-  width: 26px; 
-  height: 26px; 
-  border-radius: 8px; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  font-size: 13px; 
-} 
-
-.dstat-val { 
-  font-size: 15px; 
-  font-weight: 900; 
-} 
-
-.dstat-lbl { 
-  font-size: 11px; 
-  color: var(--text3); 
-  font-weight: 700; 
-}
-
-.chart-card { 
-  background: var(--card); 
-  border: 1.5px solid var(--border); 
-  border-radius: var(--radius); 
-  padding: 18px; 
-  margin-bottom: 14px; 
-  box-shadow: var(--shadow); 
-} 
-
-.chart-card-title { 
-  font-size: 13px; 
-  font-weight: 800; 
-  color: var(--text2); 
-  margin-bottom: 12px; 
-}
-
-.detail-actions { 
-  display: flex; 
-  gap: 8px; 
-  margin-bottom: 16px; 
-  flex-wrap: wrap; 
-} 
-
-.edit-btn, .del-btn { 
-  padding: 8px 16px; 
-  font-size: 12px; 
-  font-weight: 800; 
-  border-radius: 20px; 
-  cursor: pointer; 
-} 
-
-.edit-btn { 
-  background: linear-gradient(135deg, var(--c4), var(--c6)); 
-  color: #fff; 
-  border: none; 
-} 
-
-.del-btn { 
-  background: none; 
-  color: var(--c1); 
-  border: 1.5px solid var(--c1); 
-}
-
-.section-title { 
-  font-size: 13px; 
-  font-weight: 900; 
-  color: var(--text2); 
-  margin-bottom: 12px; 
-  letter-spacing: 1px; 
-  text-transform: uppercase; 
-} 
-
-.topic-grid { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
-  gap: 10px; 
-  margin-bottom: 18px; 
-} 
-
-.rank-item { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  padding: 12px 16px; 
-  background: #fff; 
-  border: 1px solid var(--border); 
-  border-radius: 10px; 
-  margin-bottom: 8px; 
-  font-weight: 800; 
-  font-size: 14px; 
-  color: var(--text); 
-}
-
-.empty-state { 
-  text-align: center; 
-  padding: 4rem 1rem; 
-  color: var(--text3); 
-  font-size: 15px; 
-  font-weight: 700; 
-  line-height: 2; 
-}
-
-/* ==========================================
-   🖼️ 6. 모달 창 (추가/수정)
-========================================== */
-.modal-overlay { 
-  display: none; 
-  position: fixed; 
-  inset: 0; 
-  z-index: 100; 
-  background: rgba(26,26,46,0.5); 
-  backdrop-filter: blur(4px); 
-  align-items: center; 
-  justify-content: center; 
-  padding: 1rem; 
-} 
-
-.modal-overlay.open { 
-  display: flex; 
-}
-
-.modal { 
-  background: var(--card); 
-  border: 1.5px solid var(--border); 
-  border-radius: var(--radius); 
-  padding: 1.8rem; 
-  width: 100%; 
-  max-width: 420px; 
-  max-height: 90vh; 
-  overflow-y: auto; 
-}
-
-.modal-title { 
-  font-size: 16px; 
-  font-weight: 900; 
-  margin-bottom: 1.4rem; 
-  color: var(--text); 
-} 
-
-.mform { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 12px; 
-} 
-
-.mfield label { 
-  display: block; 
-  font-size: 12px; 
-  font-weight: 800; 
-  color: var(--text2); 
-  margin-bottom: 5px; 
-} 
-
-.mfield input, .mfield select { 
-  width: 100%; 
-  padding: 10px 13px; 
-  font-size: 14px; 
-  border: 1.5px solid var(--border); 
-  border-radius: var(--radius-sm); 
-  background: var(--bg2); 
-} 
-
-.modal-actions { 
-  display: flex; 
-  gap: 8px; 
-  margin-top: 4px; 
-} 
-
-.m-save, .m-cancel { 
-  flex: 1; 
-  padding: 11px; 
-  font-size: 14px; 
-  font-weight: 800; 
-  border-radius: var(--radius-sm); 
-  cursor: pointer; 
-} 
-
-.m-save { 
-  background: linear-gradient(135deg, var(--c4), var(--c6)); 
-  color: #fff; 
-  border: none; 
-} 
-
-.m-cancel { 
-  background: none; 
-  color: var(--text2); 
-  border: 1.5px solid var(--border); 
-}
-
-.emoji-grid { 
-  display: grid; 
-  grid-template-columns: repeat(5, 1fr); 
-  gap: 6px; 
-  margin-top: 4px; 
-} 
-
-.emoji-btn { 
-  padding: 8px; 
-  font-size: 22px; 
-  border-radius: 8px; 
-  cursor: pointer; 
-  background: var(--bg2); 
-  border: 2px solid transparent; 
-} 
-
-.emoji-btn.selected { 
-  border-color: var(--c4); 
-  background: rgba(77,150,255,0.12); 
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TED – The Entry Data (Deep Analysis Engine)</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* =========================================================
+           🎨 1. 전역 변수 및 테마 색상 (단축 없이 풀어서 작성)
+        ========================================================= */
+        :root {
+            --c1: #FF6B6B; 
+            --c2: #FFB347; 
+            --c3: #6BCB77; 
+            --c4: #4D96FF; 
+            --c5: #FF922B; 
+            --c6: #9B5DE5; 
+            --c7: #00BBD4; 
+            --c8: #F72585;
+            --bg: #F5F7FF; 
+            --bg2: #EEF1FF; 
+            --card: #ffffff; 
+            --text: #1a1a2e; 
+            --text2: #4a4a7a; 
+            --text3: #8888bb;
+            --border: #E0E4FF; 
+            --radius: 16px; 
+            --radius-sm: 10px;
+            --shadow: 0 4px 20px rgba(77, 150, 255, 0.10);
+            --shadow-hover: 0 8px 32px rgba(77, 150, 255, 0.18);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            min-height: 100vh; 
+        }
+
+        .page { 
+            display: none; 
+        } 
+
+        .page.active { 
+            display: block; 
+        }
+
+        ::-webkit-scrollbar { 
+            width: 5px; 
+        } 
+
+        ::-webkit-scrollbar-track { 
+            background: var(--bg2); 
+        } 
+
+        ::-webkit-scrollbar-thumb { 
+            background: var(--c4); 
+            border-radius: 3px; 
+        }
+
+        /* =========================================================
+           🔐 2. 로그인 화면 레이아웃
+        ========================================================= */
+        .login-bg { 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 2rem 1rem; 
+            background: var(--bg); 
+        }
+
+        .ted-logo { 
+            font-size: 64px; 
+            font-weight: 900; 
+            letter-spacing: -3px; 
+            background: linear-gradient(135deg, var(--c4), var(--c6), var(--c8)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            margin-bottom: 4px; 
+        }
+
+        .ted-sub { 
+            font-size: 12px; 
+            color: var(--text3); 
+            letter-spacing: 4px; 
+            text-transform: uppercase; 
+            margin-bottom: 2rem; 
+            font-weight: 700; 
+        }
+
+        .login-card { 
+            background: var(--card); 
+            border: 1.5px solid var(--border); 
+            border-radius: var(--radius); 
+            padding: 2rem; 
+            width: 100%; 
+            max-width: 380px; 
+            box-shadow: var(--shadow); 
+        }
+
+        .lform { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            margin-top: 1.2rem; 
+        }
+
+        .lform input { 
+            padding: 11px 14px; 
+            font-size: 14px; 
+            border: 1.5px solid var(--border); 
+            border-radius: var(--radius-sm); 
+            background: var(--bg2); 
+            outline: none; 
+            font-weight: 600; 
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .lbtn { 
+            padding: 12px; 
+            font-size: 14px; 
+            font-weight: 800; 
+            border-radius: var(--radius-sm); 
+            cursor: pointer; 
+            border: none; 
+            color: #fff; 
+            background: linear-gradient(135deg, var(--c4), var(--c6)); 
+        }
+
+        /* =========================================================
+           📱 3. 메인 상단바 (네비게이션)
+        ========================================================= */
+        .topbar { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 12px 20px; 
+            background: var(--card); 
+            border-bottom: 1.5px solid var(--border); 
+            position: sticky; 
+            top: 0; 
+            z-index: 20; 
+            box-shadow: 0 2px 12px rgba(77, 150, 255, 0.08); 
+        }
+
+        .ted-sm { 
+            font-size: 22px; 
+            font-weight: 900; 
+            background: linear-gradient(135deg, var(--c4), var(--c6)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+
+        .nav-pills { 
+            display: flex; 
+            gap: 6px; 
+        } 
+
+        .npill { 
+            font-size: 12px; 
+            font-weight: 800; 
+            padding: 6px 14px; 
+            border-radius: 20px; 
+            border: 1.5px solid var(--border); 
+            background: transparent; 
+            color: var(--text2); 
+            cursor: pointer; 
+        } 
+
+        .npill.active { 
+            background: linear-gradient(135deg, var(--c4), var(--c6)); 
+            color: #fff; 
+            border-color: transparent; 
+            box-shadow: 0 2px 10px rgba(77, 150, 255, 0.3); 
+        }
+
+        .user-chip { 
+            font-size: 12px; 
+            font-weight: 800; 
+            color: var(--c4); 
+            background: rgba(77, 150, 255, 0.1); 
+            border: 1.5px solid rgba(77, 150, 255, 0.25); 
+            border-radius: 20px; 
+            padding: 5px 12px; 
+        }
+
+        .logout-btn { 
+            font-size: 12px; 
+            font-weight: 700; 
+            color: var(--text3); 
+            background: none; 
+            border: 1.5px solid var(--border); 
+            border-radius: 20px; 
+            cursor: pointer; 
+            padding: 5px 12px; 
+            margin-left: 5px; 
+        }
+
+        /* =========================================================
+           🖼️ 4. 공통 레이아웃 및 작품 카드 그리드
+        ========================================================= */
+        .main, .detail, .stats { 
+            padding: 20px; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+        }
+
+        .add-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+        } 
+
+        .add-btn { 
+            padding: 10px 20px; 
+            font-size: 13px; 
+            font-weight: 800; 
+            background: linear-gradient(135deg, var(--c4), var(--c6)); 
+            color: #fff; 
+            border: none; 
+            border-radius: var(--radius-sm); 
+            cursor: pointer; 
+        }
+
+        .works-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); 
+            gap: 14px; 
+        } 
+
+        .work-card { 
+            background: var(--card); 
+            border: 1.5px solid var(--border); 
+            border-radius: var(--radius); 
+            overflow: hidden; 
+            cursor: pointer; 
+            box-shadow: var(--shadow); 
+            position: relative; 
+            transition: transform 0.2s; 
+        }
+
+        .work-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: var(--shadow-hover); 
+            border-color: var(--c4); 
+        }
+
+        .thumb-box { 
+            width: 100%; 
+            height: 110px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 42px; 
+        } 
+
+        .card-body { 
+            padding: 10px 12px 12px; 
+        } 
+
+        .card-title { 
+            font-size: 13px; 
+            font-weight: 800; 
+            margin-bottom: 8px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        } 
+
+        .card-stats { 
+            display: flex; 
+            gap: 8px; 
+            font-size: 11px; 
+            font-weight: 700; 
+        }
+
+        .empty-state { 
+            text-align: center; 
+            padding: 4rem 1rem; 
+            color: var(--text3); 
+            font-size: 15px; 
+            font-weight: 700; 
+            line-height: 2; 
+        }
+
+        .chart-card { 
+            background: var(--card); 
+            border: 1.5px solid var(--border); 
+            border-radius: var(--radius); 
+            padding: 18px; 
+            margin-bottom: 14px; 
+            box-shadow: var(--shadow); 
+        } 
+
+        .chart-card-title { 
+            font-size: 13px; 
+            font-weight: 800; 
+            color: var(--text2); 
+            margin-bottom: 12px; 
+        }
+
+        /* =========================================================
+           🔍 5. 상세 페이지 (내 작품 전용)
+        ========================================================= */
+        .back-btn { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px; 
+            font-size: 13px; 
+            font-weight: 800; 
+            border: 1.5px solid var(--border); 
+            border-radius: 20px; 
+            padding: 7px 16px; 
+            cursor: pointer; 
+            margin-bottom: 18px; 
+            background: var(--card); 
+            color: var(--text2); 
+        }
+
+        .detail-hero { 
+            border-radius: var(--radius); 
+            overflow: hidden; 
+            margin-bottom: 16px; 
+            box-shadow: var(--shadow); 
+            border: 1.5px solid var(--border); 
+        } 
+
+        .detail-hero-thumb { 
+            width: 100%; 
+            height: 150px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 64px; 
+        }
+
+        .detail-hero-info { 
+            background: var(--card); 
+            padding: 16px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 12px; 
+        } 
+
+        .detail-title { 
+            font-size: 18px; 
+            font-weight: 900; 
+            color: var(--text); 
+        } 
+
+        .dstat { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+        } 
+
+        .dstat-val { 
+            font-size: 15px; 
+            font-weight: 900; 
+        } 
+
+        .del-btn { 
+            padding: 8px 16px; 
+            font-size: 12px; 
+            font-weight: 800; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            background: none; 
+            color: var(--c1); 
+            border: 1.5px solid var(--c1); 
+            margin-left: 10px; 
+        }
+
+        .link-btn { 
+            padding: 8px 16px; 
+            font-size: 12px; 
+            font-weight: 800; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            background: var(--c4); 
+            color: white; 
+            border: none; 
+            margin-left: 10px; 
+            text-decoration: none; 
+        }
+
+        /* =========================================================
+           🛠️ 6. 팝업 모달창 공통 (입력창 및 딥 분석기)
+        ========================================================= */
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            z-index: 100; 
+            background: rgba(26, 26, 46, 0.5); 
+            backdrop-filter: blur(4px); 
+            align-items: center; 
+            justify-content: center; 
+            padding: 1rem; 
+        } 
+
+        .modal-overlay.open { 
+            display: flex; 
+        }
+
+        .modal { 
+            background: var(--card); 
+            border: 1.5px solid var(--border); 
+            border-radius: var(--radius); 
+            padding: 1.8rem; 
+            width: 100%; 
+            max-width: 500px; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+        }
+
+        .modal-title { 
+            font-size: 16px; 
+            font-weight: 900; 
+            margin-bottom: 1.4rem; 
+        } 
+
+        .mfield { 
+            margin-bottom: 12px; 
+        }
+
+        .mfield label { 
+            display: block; 
+            font-size: 12px; 
+            font-weight: 800; 
+            color: var(--text2); 
+            margin-bottom: 5px; 
+        } 
+
+        .mfield input, .mfield select { 
+            width: 100%; 
+            padding: 10px 13px; 
+            font-size: 14px; 
+            border: 1.5px solid var(--border); 
+            border-radius: var(--radius-sm); 
+            background: var(--bg2); 
+        } 
+
+        .modal-actions { 
+            display: flex; 
+            gap: 8px; 
+            margin-top: 16px; 
+        } 
+
+        .m-save { 
+            flex: 1; 
+            padding: 11px; 
+            background: linear-gradient(135deg, var(--c4), var(--c6)); 
+            color: #fff; 
+            border: none; 
+            border-radius: var(--radius-sm); 
+            font-weight: 800; 
+            cursor: pointer; 
+        } 
+
+        .m-cancel { 
+            flex: 1; 
+            padding: 11px; 
+            background: none; 
+            border: 1.5px solid var(--border); 
+            color: var(--text2); 
+            border-radius: var(--radius-sm); 
+            font-weight: 800; 
+            cursor: pointer; 
+        }
+        
+        .emoji-grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 6px; 
+        } 
+
+        .emoji-btn { 
+            padding: 8px; 
+            font-size: 22px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            background: var(--bg2); 
+            border: 2px solid transparent; 
+        } 
+
+        .emoji-btn.selected { 
+            border-color: var(--c4); 
+            background: rgba(77, 150, 255, 0.12); 
+        }
+
+        /* 심층 분석 리포트 전용 스타일 */
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .report-box {
+            background: var(--bg2);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .report-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text3);
+            margin-bottom: 4px;
+        }
+        .report-value {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--c4);
+        }
+        .ai-comment-box {
+            background: linear-gradient(135deg, #FFF0F0, #FFF5E6);
+            border: 1.5px solid #FFD8A8;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            color: #D9480F;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 <body>
 
-<div id="page-login" class="page active">
-  <div class="login-bg">
-    <div class="ted-logo">TED</div>
-    <div class="ted-sub">The Entry Data</div>
-    
-    <div class="login-card">
-      <h2 id="login-heading">✏️ 닉네임을 입력하고 시작하세요</h2>
-      
-      <div class="lform">
-        <input type="text" id="login-name" placeholder="엔트리 닉네임 (예: 코딩왕123)" oninput="onNameInput()" />
-        
-        <div id="pw-section" style="display:none; flex-direction:column; gap:10px;">
-          <input type="password" id="login-pw" placeholder="비밀번호" />
-          <input type="password" id="login-pw2" placeholder="비밀번호 확인 (신규 계정)" style="display:none;" />
-        </div>
-        
-        <div id="login-msg" style="font-size:12px; font-weight:700; color:var(--text3); min-height:16px;"></div>
-        
-        <button class="lbtn" onclick="doLogin()">🚀 시작하기</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="page-dash" class="page">
-  <div class="topbar">
-    <div style="display:flex; align-items:center; gap:12px;">
-      <div class="ted-sm" onclick="switchView('home')">TED</div>
-      <div class="nav-pills">
-        <button class="npill active" id="pill-home" onclick="switchView('home')">내 작품</button>
-        <button class="npill" id="pill-stats" onclick="switchView('stats')">전체 통계</button>
-      </div>
-    </div>
-    
-    <div style="display:flex; align-items:center; gap:8px;">
-      <button class="logout-btn" onclick="loadWorks()" style="color:var(--c4); border-color:var(--c4);">🔄 새로고침</button>
-      <div class="user-chip" id="user-chip">@user</div>
-      <button class="logout-btn" onclick="doLogout()">로그아웃</button>
-    </div>
-  </div>
-
-  <div id="view-home">
-    <div class="main">
-      <div class="add-bar">
-        <div class="add-bar-title">📚 내 작품 목록 <span id="works-count" style="color:var(--c4);"></span></div>
-        <button class="add-btn" onclick="openAddModal()">＋ 작품 추가</button>
-      </div>
-      
-      <div id="home-empty" class="empty-state">
-        ✨ 아직 작품이 없어요!<br>위의 <b>작품 추가</b> 버튼을 눌러 추가해 보세요.
-      </div>
-      
-      <div class="works-grid" id="works-grid"></div>
-    </div>
-  </div>
-
-  <div id="view-detail" style="display:none;">
-    <div class="detail">
-      <button class="back-btn" onclick="switchView('home')">← 목록으로</button>
-      
-      <div class="detail-actions">
-        <button class="edit-btn" onclick="openEditModal()">✏️ 수정</button>
-        <button class="del-btn" onclick="deleteWork()">🗑 삭제</button>
-      </div>
-      
-      <div class="detail-hero">
-        <div class="detail-hero-thumb" id="d-thumb"></div>
-        <div class="detail-hero-info">
-          <div class="detail-title" id="d-title"></div>
-          <div class="detail-stats-row" id="d-stats-row"></div>
-        </div>
-      </div>
-      
-      <div class="chart-card">
-        <div class="chart-card-title">📈 성장 발자취 (조회수 꺾은선 그래프)</div>
-        <div style="position:relative; width:100%; height:220px;">
-          <canvas id="det-line"></canvas>
-        </div>
-      </div>
-      
-      <div class="chart-card">
-        <div class="chart-card-title">📊 현재 반응 지표</div>
-        <div style="position:relative; width:100%; height:200px;">
-          <canvas id="det-bar"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="view-stats" style="display:none;">
-    <div class="stats">
-      <div id="stats-empty" class="empty-state">작품을 먼저 추가해 주세요 😊</div>
-      
-      <div id="stats-content" style="display:none;">
-        <div class="chart-card" style="background:linear-gradient(135deg, #FFFDF5, #FFF); border-color:#FFE066;">
-          <div class="chart-card-title" style="color:#D48000;">🏆 명예의 전당 (조회수 TOP 3)</div>
-          <div id="ranking-board"></div>
-        </div>
-        
-        <div class="chart-card">
-          <div class="chart-card-title">🔥 주제별 작품 분포</div>
-          <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:center;">
-            <div style="width:160px; height:160px; position:relative;">
-              <canvas id="stats-doughnut"></canvas>
+    <div id="page-login" class="page active">
+        <div class="login-bg">
+            <div class="ted-logo">TED</div>
+            <div class="ted-sub">Analysis Engine</div>
+            
+            <div class="login-card">
+                <h2 id="login-heading" style="font-size:15px; font-weight:900; color:var(--text2);">
+                    ✏️ 닉네임을 입력하고 시작하세요
+                </h2>
+                
+                <div class="lform">
+                    <input type="text" id="login-name" placeholder="엔트리 닉네임 (예: 코딩왕123)" oninput="handleNameInput()" />
+                    
+                    <div id="pw-section" style="display:none; flex-direction:column; gap:10px;">
+                        <input type="password" id="login-pw" placeholder="비밀번호" />
+                        <input type="password" id="login-pw2" placeholder="비밀번호 확인 (신규 계정)" style="display:none;" />
+                    </div>
+                    
+                    <div id="login-msg" style="font-size:12px; font-weight:700; color:var(--text3); min-height:16px;"></div>
+                    
+                    <button class="lbtn" onclick="executeLogin()">🚀 시작하기</button>
+                </div>
             </div>
-            <div class="topic-grid" id="topic-grid" style="flex:1; display:flex; flex-direction:column; gap:10px;"></div>
-          </div>
         </div>
-        
-        <div class="chart-card" style="margin-bottom:14px;">
-          <div class="chart-card-title">📈 전체 작품 조회수 비교</div>
-          <div style="position:relative; width:100%;" id="stats-wrap1">
-            <canvas id="stats-bar"></canvas>
-          </div>
-        </div>
-        
-        <div class="chart-card">
-          <div class="chart-card-title">💛 반응률 분석 (좋아요 vs 조회수)</div>
-          <div style="position:relative; width:100%; height:240px;">
-            <canvas id="stats-scatter"></canvas>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
 
-<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
-  <div class="modal">
-    <div class="modal-title" id="modal-title">✨ 작품 추가/수정</div>
-    <div class="mform">
-      <div class="mfield">
-        <label>작품 이름</label>
-        <input type="text" id="m-name" placeholder="예: 마리오 달리기 게임" />
-      </div>
-      
-      <div class="mfield">
-        <label>엔트리 작품 주소 (URL)</label>
-        <input type="text" id="m-url" placeholder="https://playentry.org/project/..." />
-      </div>
-      
-      <div class="mfield">
-        <label>주제</label>
-        <select id="m-topic">
-          <option value="게임">🎮 게임</option>
-          <option value="생활과 도구">🔧 생활과 도구</option>
-          <option value="만화">🎬 만화</option>
-          <option value="예술">🎨 예술</option>
-          <option value="지식공유">📚 지식공유</option>
-        </select>
-      </div>
-      
-      <div class="mfield">
-        <label>이모지 선택</label>
-        <div class="emoji-grid" id="emoji-grid"></div>
-      </div>
-      
-      <div class="modal-actions">
-        <button class="m-cancel" onclick="closeModal()">취소</button>
-        <button class="m-save" onclick="saveWork()">💾 저장</button>
-      </div>
+    <div id="page-dash" class="page">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="ted-sm">TED</div>
+                <div class="nav-pills">
+                    <button class="npill active" id="tab-home" onclick="switchMainView('home')">내 작품</button>
+                    <button class="npill" id="tab-stats" onclick="switchMainView('stats')">전체 통계</button>
+                    <button class="npill" id="tab-trend" onclick="switchMainView('trend')">📈 트렌드 분석</button>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button onclick="fetchDatabaseData()" style="padding:5px 12px; font-size:12px; font-weight:800; border-radius:20px; border:1.5px solid var(--c4); color:var(--c4); background:none; cursor:pointer;">
+                    🔄 새로고침
+                </button>
+                <div class="user-chip" id="user-chip">@user</div>
+                <button class="logout-btn" onclick="executeLogout()">로그아웃</button>
+            </div>
+        </div>
+
+        <div id="view-home" class="main">
+            <div class="add-bar">
+                <div style="font-size:16px; font-weight:900; color:var(--text2);">
+                    📚 나의 포트폴리오 <span id="works-count" style="color:var(--c4);"></span>
+                </div>
+                <button class="add-btn" onclick="openAddUrlModal()">＋ 내 작품 URL 추가</button>
+            </div>
+            
+            <div id="home-empty" class="empty-state">
+                내 작품 URL을 등록하면 봇이 30분마다 순찰하며 데이터를 수집합니다!
+            </div>
+            
+            <div class="works-grid" id="my-grid"></div>
+        </div>
+
+        <div id="view-detail" class="detail" style="display:none;">
+            <button class="back-btn" onclick="switchMainView('home')">← 목록으로</button>
+            <button class="del-btn" onclick="deleteCurrentWork()">🗑 삭제</button>
+            <a id="d-link" href="#" target="_blank" class="link-btn">엔트리 작품 보러가기 🔗</a>
+            
+            <div class="detail-hero">
+                <div class="detail-hero-thumb" id="d-thumb"></div>
+                <div class="detail-hero-info">
+                    <div class="detail-title" id="d-title"></div>
+                    <div style="display:flex; gap:12px;">
+                        <div class="dstat">
+                            <span style="font-size:13px;">👁</span>
+                            <div class="dstat-val" id="d-views" style="color:#4D96FF;"></div>
+                        </div>
+                        <div class="dstat">
+                            <span style="font-size:13px;">♥</span>
+                            <div class="dstat-val" id="d-likes" style="color:#FF6B6B;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-card-title">📈 성장 발자취 (조회수 누적 그래프)</div>
+                <div style="position:relative; width:100%; height:220px;">
+                    <canvas id="det-line"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-stats" class="main" style="display:none;">
+            <div id="stats-empty" class="empty-state">작품을 먼저 추가해 주세요 😊</div>
+            
+            <div id="stats-content" style="display:none;">
+                <div class="chart-card" style="background:linear-gradient(135deg, #FFFDF5, #FFF); border-color:#FFE066;">
+                    <div class="chart-card-title" style="color:#D48000;">🏆 명예의 전당 (내 작품 조회수 TOP 3)</div>
+                    <div id="ranking-board"></div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-card-title">🔥 주제별 내 작품 분포</div>
+                    <div style="position:relative; width:100%; height:200px;">
+                        <canvas id="stats-doughnut"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-trend" class="main" style="display:none;">
+            <div class="add-bar">
+                <div style="font-size:16px; font-weight:900; color:var(--text2);">🕵️‍♂️ 엔트리 전체 트렌드 자동 분석</div>
+            </div>
+            
+            <div class="chart-card">
+                <div style="font-size:14px; font-weight:800; margin-bottom:10px;">📈 실시간 핫(Hot) 트렌드 그래프 모아보기</div>
+                <div style="position:relative; width:100%; height:250px;">
+                    <canvas id="trend-line"></canvas>
+                </div>
+            </div>
+
+            <div style="font-size:14px; font-weight:900; color:var(--text2); margin:20px 0 10px;">
+                📌 봇이 수집한 인기 타겟 (카드를 클릭하여 극한의 대조 분석을 실행하세요!)
+            </div>
+            
+            <div id="trend-empty" class="empty-state">
+                봇이 아직 데이터를 수집 중입니다. (파이썬 봇을 한 번 실행해 주세요)
+            </div>
+            
+            <div class="works-grid" id="bench-grid"></div>
+        </div>
     </div>
-  </div>
-</div>
+
+    <div class="modal-overlay" id="add-modal">
+        <div class="modal">
+            <div class="modal-title" id="m-title">✨ 내 작품 URL 원터치 등록</div>
+            <p style="font-size:12px; color:var(--text3); margin-bottom:15px;">
+                작품 주소만 넣으세요! 봇이 30분 뒤 제목을 알아서 긁어옵니다.
+            </p>
+            
+            <div class="mfield">
+                <label>🔗 엔트리 작품 주소 (URL)</label>
+                <input type="text" id="m-url" placeholder="https://playentry.org/project/..." />
+            </div>
+            
+            <div class="mfield">
+                <label>📁 분류 테마</label>
+                <select id="m-topic">
+                    <option value="게임">🎮 게임</option>
+                    <option value="스토리/만화">🎬 스토리/만화</option>
+                    <option value="생활/유틸">🔧 생활/유틸</option>
+                    <option value="타이포/예술">🎨 타이포/예술</option>
+                </select>
+            </div>
+
+            <div class="mfield">
+                <label>🌟 대표 이모지 (15종)</label>
+                <div class="emoji-grid" id="emoji-grid"></div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="m-cancel" onclick="closeAddModal()">취소</button>
+                <button class="m-save" onclick="saveMyURLToDatabase()">🚀 봇에게 수집 지시</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="deep-analysis-modal">
+        <div class="modal" style="max-width: 650px;">
+            <div class="modal-title">🧠 AI 딥 다이브 분석 리포트</div>
+            <p style="font-size:13px; color:var(--text2); margin-bottom:15px;">
+                선택하신 타겟 작품을 현재 엔트리의 <b>가장 인기 있는 대박 작품(상위 1%)</b>, <b>가장 성장이 멈춘 쪽박 작품(하위 10%)</b>과 동시에 겹쳐서 비교 분석합니다.
+            </p>
+            
+            <div class="report-grid">
+                <div class="report-box">
+                    <div class="report-label">타겟 작품 평균 성장 속도</div>
+                    <div class="report-value" id="report-growth">계산 중...</div>
+                </div>
+                <div class="report-box">
+                    <div class="report-label">타겟 작품 시청자 반응률 (좋아요/조회수)</div>
+                    <div class="report-value" id="report-engagement" style="color:#FF6B6B;">계산 중...</div>
+                </div>
+            </div>
+
+            <div class="ai-comment-box" id="ai-comment-box">
+                💡 <b>AI 종합 평가:</b> 데이터를 분석하고 있습니다...
+            </div>
+
+            <div style="font-size:12px; font-weight:800; color:var(--text3); margin-bottom:5px;">
+                📊 성장 궤적 대조 그래프 (타겟 vs 대박작 vs 쪽박작)
+            </div>
+            <div style="position:relative; width:100%; height:280px; margin-bottom:15px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px;">
+                <canvas id="deep-compare-line"></canvas>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="m-cancel" style="width:100%;" onclick="closeDeepAnalysisModal()">리포트 닫기</button>
+            </div>
+        </div>
+    </div>
 
 <script>
-// ==========================================
-// ⚙️ 1. 설정 및 수파베이스 연동
-// ==========================================
-const SUPABASE_URL = "https://xuaoetbkjbuokugprssl.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1YW9ldGJramJ1b2t1Z3Byc3NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjY2MTIsImV4cCI6MjA5Njc0MjYxMn0.83uFvaO297axM7zUvvOR8odg7OuQX5m_kB7vcTz3q0M";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // ---------------------------------------------------------
+    // 1. 수파베이스 설정 및 전역 변수 초기화
+    // ---------------------------------------------------------
+    const SUPABASE_URL = "https://xuaoetbkjbuokugprssl.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1YW9ldGJramJ1b2t1Z3Byc3NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjY2MTIsImV4cCI6MjA5Njc0MjYxMn0.83uFvaO297axM7zUvvOR8odg7OuQX5m_kB7vcTz3q0M";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let currentUser = localStorage.getItem('ted-user') || '';
-let worksData = []; 
-let allHistoryData = []; 
-let detailIdx = -1; 
-let editMode = false; 
-let selectedEmoji = '🎮';
-
-let detC1 = null;
-let detLine = null;
-let stBar = null;
-let stDoughnut = null;
-let stScatter = null;
-
-const PALETTES = [
-  {bg:'linear-gradient(135deg,#FF6B6B,#FF922B)'},
-  {bg:'linear-gradient(135deg,#4D96FF,#9B5DE5)'},
-  {bg:'linear-gradient(135deg,#6BCB77,#00BBD4)'},
-  {bg:'linear-gradient(135deg,#FFD93D,#FF922B)'},
-  {bg:'linear-gradient(135deg,#9B5DE5,#F72585)'}
-];
-
-const EMOJIS = ['🎮','🚀','🌿','⭐','🎨','🌊','🌸','🍀','🔥','💎','🎯','🏆','🎭','🦄','🐱'];
-const TCOLORS = ['#4D96FF','#6BCB77','#FF922B','#9B5DE5','#FFB347'];
-
-// ==========================================
-// 🔑 2. 계정 및 화면 전환 관리
-// ==========================================
-if (currentUser) { 
-  document.getElementById('user-chip').textContent = '@' + currentUser; 
-  document.getElementById('page-login').classList.remove('active'); 
-  document.getElementById('page-dash').classList.add('active'); 
-  loadWorks(); 
-}
-
-function pwKey(name) { 
-  return 'ted-pw-' + name; 
-}
-
-function onNameInput() { 
-  const name = document.getElementById('login-name').value.trim(); 
-  const pwSection = document.getElementById('pw-section'); 
-  const pw2 = document.getElementById('login-pw2'); 
-  const msg = document.getElementById('login-msg'); 
-  const heading = document.getElementById('login-heading'); 
-  
-  if (!name) { 
-    pwSection.style.display = 'none'; 
-    msg.textContent = ''; 
-    heading.textContent = '✏️ 닉네임을 입력하고 시작하세요'; 
-    return; 
-  } 
-  
-  const exists = localStorage.getItem(pwKey(name)) !== null; 
-  pwSection.style.display = 'flex'; 
-  
-  if (exists) { 
-    heading.textContent = '🔐 비밀번호를 입력하세요'; 
-    pw2.style.display = 'none'; 
-    msg.textContent = '기존 계정입니다. 비밀번호를 입력해 주세요.'; 
-    msg.style.color = 'var(--c4)'; 
-  } else { 
-    heading.textContent = '🆕 새 계정을 만들어요'; 
-    pw2.style.display = 'block'; 
-    msg.textContent = '새 계정입니다. 사용할 비밀번호를 설정해 주세요.'; 
-    msg.style.color = 'var(--c3)'; 
-  } 
-}
-
-function doLogin() { 
-  const name = document.getElementById('login-name').value.trim(); 
-  if (!name) { 
-    alert('닉네임을 입력해 주세요'); 
-    return; 
-  } 
-  
-  const pw = document.getElementById('login-pw').value; 
-  const pw2 = document.getElementById('login-pw2').value; 
-  const exists = localStorage.getItem(pwKey(name)) !== null; 
-  const msg = document.getElementById('login-msg'); 
-  
-  if (!pw) { 
-    alert('비밀번호를 입력해 주세요'); 
-    return; 
-  } 
-  
-  const MASTER_PW = 'wlslwlsl12!@'; 
-  
-  if (exists) { 
-    if (pw !== MASTER_PW && localStorage.getItem(pwKey(name)) !== pw) { 
-      msg.textContent = '❌ 비밀번호가 틀렸습니다.'; 
-      msg.style.color = 'var(--c1)'; 
-      return; 
-    } 
-  } else { 
-    if (pw.length < 4) { 
-      alert('비밀번호는 4자 이상이어야 합니다'); 
-      return; 
-    } 
-    if (pw !== pw2) { 
-      msg.textContent = '❌ 비밀번호가 일치하지 않습니다.'; 
-      msg.style.color = 'var(--c1)'; 
-      return; 
-    } 
-    localStorage.setItem(pwKey(name), pw); 
-  } 
-  
-  currentUser = name; 
-  localStorage.setItem('ted-user', name); 
-  document.getElementById('user-chip').textContent = '@' + name; 
-  document.getElementById('page-login').classList.remove('active'); 
-  document.getElementById('page-dash').classList.add('active'); 
-  loadWorks(); 
-}
-
-function doLogout() { 
-  switchView('home'); 
-  document.getElementById('page-dash').classList.remove('active'); 
-  document.getElementById('page-login').classList.add('active'); 
-  document.getElementById('login-name').value = ''; 
-  document.getElementById('login-pw').value = ''; 
-  document.getElementById('login-pw2').value = ''; 
-  document.getElementById('pw-section').style.display = 'none'; 
-  document.getElementById('login-msg').textContent = ''; 
-  document.getElementById('login-heading').textContent = '✏️ 닉네임을 입력하고 시작하세요'; 
-}
-
-function switchView(v) { 
-  ['home','detail','stats'].forEach(n => {
-    document.getElementById('view-' + n).style.display = v === n ? 'block' : 'none';
-  }); 
-  
-  document.getElementById('pill-home').classList.toggle('active', v !== 'stats'); 
-  document.getElementById('pill-stats').classList.toggle('active', v === 'stats'); 
-  
-  if (v === 'stats') {
-    renderStats(); 
-  }
-}
-
-// ==========================================
-// 📥 3. 데이터 로딩 (핵심 로직 포함)
-// ==========================================
-async function loadWorks() {
-  const { data, error } = await supabaseClient
-    .from('works')
-    .select('*')
-    .order('created_at', { ascending: false });
+    let currentLoggedInUser = localStorage.getItem('ted-user-v5') || '';
     
-  if (error) { 
-    console.error(error); 
-    return; 
-  }
-  
-  if (data && data.length > 0) {
-    const userWorks = data.filter(row => row.username === currentUser);
+    let userWorksArray = [];
+    let botCollectedTrendWorksArray = [];
+    let completeHistoryData = [];
     
-    // 그래프를 위해 과거 데이터는 따로 안전하게 보존합니다.
-    allHistoryData = userWorks; 
+    let currentSelectedEmoji = '🎮';
+    let currentDetailWorkName = '';
     
-    // 🚨 핵심 수정 부분: '작품 이름'을 기준으로 중복을 완벽하게 제거하여 최신 1개만 남깁니다.
-    let latestWorks = {};
-    userWorks.forEach(row => { 
-      if (!latestWorks[row.work_name]) {
-        latestWorks[row.work_name] = row; 
-      }
-    });
+    const AVAILABLE_EMOJIS = ['🎮','🚀','🌿','⭐','🎨','🌊','🌸','🍀','🔥','💎','🎯','🏆','🎭','🦄','🐱'];
     
-    worksData = Object.values(latestWorks).map((row, idx) => ({
-      id: row.id, 
-      name: row.work_name, 
-      url: row.entry_url, 
-      views: row.views || 0, 
-      likes: row.likes || 0, 
-      comments: row.comments || 0, 
-      bookmarks: row.bookmarks || 0,
-      topic: row.topic || '게임', 
-      emoji: row.emoji || '✨', 
-      bg: PALETTES[idx % PALETTES.length].bg
-    }));
-  } else { 
-    worksData = []; 
-    allHistoryData = []; 
-  }
-  
-  renderGrid(); 
-  
-  if (document.getElementById('view-stats').style.display === 'block') {
-    renderStats(); 
-  }
-}
+    let detailLineChartObj = null;
+    let statsDoughnutChartObj = null;
+    let globalTrendLineChartObj = null;
+    let deepAnalysisChartObj = null; // 딥 다이브 분석용 차트 객체
 
-// ==========================================
-// 🎨 4. 카드 목록 및 그리드 렌더링
-// ==========================================
-function renderGrid() {
-  const grid = document.getElementById('works-grid'); 
-  grid.innerHTML = '';
-  
-  const count = document.getElementById('works-count');
-  
-  if (!worksData || worksData.length === 0) { 
-    document.getElementById('home-empty').style.display = 'block'; 
-    count.textContent = ''; 
-    return; 
-  }
-  
-  document.getElementById('home-empty').style.display = 'none'; 
-  count.textContent = `(${worksData.length}개)`;
-
-  const top3Urls = [...worksData].sort((a,b) => b.views - a.views).slice(0, 3).map(w => w.url);
-  
-  worksData.forEach((w, i) => {
-    let badgeHTML = '<div class="badges">';
-    if (top3Urls.includes(w.url) && w.views > 0) {
-      badgeHTML += '<div class="badge badge-best">👑 BEST</div>';
+    // ---------------------------------------------------------
+    // 2. 로그인 및 회원가입 로직
+    // ---------------------------------------------------------
+    if (currentLoggedInUser !== '') {
+        document.getElementById('user-chip').textContent = '@' + currentLoggedInUser;
+        document.getElementById('page-login').classList.remove('active');
+        document.getElementById('page-dash').classList.add('active');
+        fetchDatabaseData();
     }
-    if (w.likes >= 5) {
-      badgeHTML += '<div class="badge badge-hot">🔥 HOT</div>';
+
+    function generatePasswordKey(username) { 
+        return 'ted-pw-v5-' + username; 
     }
-    badgeHTML += '</div>';
 
-    const card = document.createElement('div'); 
-    card.className = 'work-card'; 
-    card.style.animationDelay = (i * 0.06) + 's'; 
-    card.onclick = () => openDetail(i);
-    
-    card.innerHTML = `
-      ${badgeHTML}
-      <div class="thumb-box" style="background:${w.bg};">${w.emoji}</div>
-      <div class="card-body">
-        <div class="card-title">${w.name}</div>
-        <div class="card-stats">
-          <span class="cstat cs-v">👁 ${fmt(w.views)}</span>
-          <span class="cstat cs-l">♥ ${fmt(w.likes)}</span>
-        </div>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
-// ==========================================
-// 📊 5. 상세 데이터 뷰 및 그래프 렌더링
-// ==========================================
-function openDetail(idx) {
-  detailIdx = idx; 
-  const w = worksData[idx]; 
-  switchView('detail');
-  
-  document.getElementById('d-thumb').style.background = w.bg; 
-  document.getElementById('d-thumb').textContent = w.emoji; 
-  document.getElementById('d-title').textContent = w.name;
-  
-  document.getElementById('d-stats-row').innerHTML = `
-    <div class="dstat">
-      <div class="dstat-icon" style="background:rgba(77,150,255,0.15);">👁</div>
-      <div>
-        <div class="dstat-val" style="color:#4D96FF;">${w.views.toLocaleString()}</div>
-        <div class="dstat-lbl">조회수</div>
-      </div>
-    </div>
-    <div class="dstat">
-      <div class="dstat-icon" style="background:rgba(255,107,107,0.15);">♥</div>
-      <div>
-        <div class="dstat-val" style="color:#FF6B6B;">${w.likes.toLocaleString()}</div>
-        <div class="dstat-lbl">좋아요</div>
-      </div>
-    </div>
-  `;
-
-  if (detC1) {
-    detC1.destroy();
-  }
-  
-  detC1 = new Chart(document.getElementById('det-bar'), { 
-    type: 'bar', 
-    data: { 
-      labels: ['조회수','좋아요','댓글','북마크'], 
-      datasets: [{ 
-        data: [w.views, w.likes, w.comments, w.bookmarks], 
-        backgroundColor: ['#4D96FF','#FF6B6B','#6BCB77','#FFB347'], 
-        borderRadius: 6 
-      }] 
-    }, 
-    options: { 
-      responsive: true, 
-      maintainAspectRatio: false, 
-      plugins: { 
-        legend: { display: false } 
-      } 
-    } 
-  });
-
-  const historyForThisWork = allHistoryData.filter(row => row.work_name === w.name).reverse();
-  const labels = historyForThisWork.map(row => { 
-    const d = new Date(row.created_at); 
-    return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; 
-  });
-  const dataViews = historyForThisWork.map(row => row.views || 0);
-  
-  if (detLine) {
-    detLine.destroy();
-  }
-  
-  if (dataViews.length > 0) { 
-    detLine = new Chart(document.getElementById('det-line'), { 
-      type: 'line', 
-      data: { 
-        labels: labels, 
-        datasets: [{ 
-          label: '조회수', 
-          data: dataViews, 
-          borderColor: '#4D96FF', 
-          backgroundColor: 'rgba(77, 150, 255, 0.1)', 
-          borderWidth: 3, 
-          pointRadius: 4, 
-          fill: true, 
-          tension: 0.2 
-        }] 
-      }, 
-      options: { 
-        responsive: true, 
-        maintainAspectRatio: false, 
-        plugins: { 
-          legend: { display: false } 
+    function handleNameInput() { 
+        const nameInputElem = document.getElementById('login-name');
+        const typedName = nameInputElem.value.trim(); 
+        
+        const pwSectionElem = document.getElementById('pw-section'); 
+        const pw2Elem = document.getElementById('login-pw2'); 
+        const msgElem = document.getElementById('login-msg'); 
+        const headingElem = document.getElementById('login-heading'); 
+        
+        if (typedName === '') { 
+            pwSectionElem.style.display = 'none'; 
+            msgElem.textContent = ''; 
+            headingElem.textContent = '✏️ 닉네임을 입력하고 시작하세요'; 
+            return; 
         } 
-      } 
-    }); 
-  }
-}
-
-// ==========================================
-// 📈 6. 전체 통계 화면 렌더링
-// ==========================================
-function renderStats() {
-  if (!worksData || worksData.length === 0) { 
-    document.getElementById('stats-empty').style.display = 'block'; 
-    document.getElementById('stats-content').style.display = 'none'; 
-    return; 
-  }
-  
-  document.getElementById('stats-empty').style.display = 'none'; 
-  document.getElementById('stats-content').style.display = 'block';
-
-  // 명예의 전당 계산
-  const sorted = [...worksData].sort((a,b) => b.views - a.views);
-  const rb = document.getElementById('ranking-board'); 
-  rb.innerHTML = '';
-  
-  sorted.slice(0, 3).forEach((w, i) => { 
-    const medal = ['🥇', '🥈', '🥉'][i]; 
-    rb.innerHTML += `
-      <div class="rank-item">
-        <div>${medal} &nbsp; ${w.name}</div>
-        <div style="color:#4D96FF;">👁 ${w.views.toLocaleString()}</div>
-      </div>
-    `; 
-  });
-
-  // 주제별 통계 및 도넛 차트
-  const topicMap = {}; 
-  worksData.forEach(w => { 
-    if(!topicMap[w.topic]) {
-      topicMap[w.topic] = { cnt: 0, sum: 0 }; 
+        
+        const isExistingUser = localStorage.getItem(generatePasswordKey(typedName)) !== null; 
+        pwSectionElem.style.display = 'flex'; 
+        
+        if (isExistingUser === true) { 
+            headingElem.textContent = '🔐 비밀번호를 입력하세요'; 
+            pw2Elem.style.display = 'none'; 
+            msgElem.textContent = '기존 계정입니다. 비밀번호를 입력해 주세요.'; 
+            msgElem.style.color = 'var(--c4)'; 
+        } else { 
+            headingElem.textContent = '🆕 새 계정을 만들어요'; 
+            pw2Elem.style.display = 'block'; 
+            msgElem.textContent = '새 계정입니다. 사용할 비밀번호를 설정해 주세요.'; 
+            msgElem.style.color = 'var(--c3)'; 
+        } 
     }
-    topicMap[w.topic].cnt++; 
-    topicMap[w.topic].sum += w.views; 
-  });
-  
-  const topics = Object.keys(topicMap); 
-  const topicCnts = topics.map(t => topicMap[t].cnt);
-  
-  if (stDoughnut) {
-    stDoughnut.destroy(); 
-  }
-  
-  stDoughnut = new Chart(document.getElementById('stats-doughnut'), { 
-    type: 'doughnut', 
-    data: { 
-      labels: topics, 
-      datasets: [{ 
-        data: topicCnts, 
-        backgroundColor: TCOLORS, 
-        borderWidth: 0 
-      }] 
-    }, 
-    options: { 
-      responsive: true, 
-      maintainAspectRatio: false, 
-      plugins: { 
-        legend: { 
-          position: 'right', 
-          labels: { font: { size: 11 } } 
+
+    function executeLogin() { 
+        const nameInputElem = document.getElementById('login-name');
+        const typedName = nameInputElem.value.trim(); 
+        
+        if (typedName === '') { 
+            alert('닉네임을 입력해 주세요'); 
+            return; 
         } 
-      } 
-    } 
-  });
-
-  const tGrid = document.getElementById('topic-grid'); 
-  tGrid.innerHTML = '';
-  
-  topics.forEach((t, i) => { 
-    const avg = Math.round(topicMap[t].sum / topicMap[t].cnt); 
-    tGrid.innerHTML += `
-      <div style="display:flex; justify-content:space-between; padding:8px 12px; background:var(--bg2); border-radius:8px; font-size:12px; font-weight:800;">
-        <span style="color:${TCOLORS[i % TCOLORS.length]}">${t} (${topicMap[t].cnt}개)</span>
-        <span>평균 👁 ${avg.toLocaleString()}</span>
-      </div>
-    `; 
-  });
-
-  // 전체 작품 조회수 비교 막대 차트
-  const wrapH = Math.max(200, sorted.length * 40 + 50); 
-  document.getElementById('stats-wrap1').style.height = wrapH + 'px';
-  
-  if (stBar) {
-    stBar.destroy(); 
-  }
-  
-  stBar = new Chart(document.getElementById('stats-bar'), { 
-    type: 'bar', 
-    data: { 
-      labels: sorted.map(w => w.name.length > 8 ? w.name.slice(0,8) + '…' : w.name), 
-      datasets: [{ 
-        data: sorted.map(w => w.views), 
-        backgroundColor: '#4D96FF', 
-        borderRadius: 4 
-      }] 
-    }, 
-    options: { 
-      indexAxis: 'y', 
-      maintainAspectRatio: false, 
-      plugins: { 
-        legend: { display: false } 
-      } 
-    } 
-  });
-
-  // 반응률 분석 산점도 차트
-  if (stScatter) {
-    stScatter.destroy(); 
-  }
-  
-  stScatter = new Chart(document.getElementById('stats-scatter'), { 
-    type: 'scatter', 
-    data: { 
-      datasets: [{ 
-        label: '작품', 
-        data: worksData.map(w => ({ x: w.views, y: w.likes, label: w.name })), 
-        backgroundColor: '#FF6B6B', 
-        pointRadius: 8 
-      }] 
-    }, 
-    options: { 
-      maintainAspectRatio: false, 
-      plugins: { 
-        legend: { display: false }, 
-        tooltip: { 
-          callbacks: { 
-            label: c => `${c.raw.label}: 👁${c.raw.x} / ♥${c.raw.y}` 
-          } 
+        
+        const pwInputElem = document.getElementById('login-pw');
+        const pw2InputElem = document.getElementById('login-pw2');
+        const typedPw = pwInputElem.value; 
+        const typedPw2 = pw2InputElem.value; 
+        
+        const isExistingUser = localStorage.getItem(generatePasswordKey(typedName)) !== null; 
+        const msgElem = document.getElementById('login-msg'); 
+        
+        if (typedPw === '') { 
+            alert('비밀번호를 입력해 주세요'); 
+            return; 
         } 
-      } 
-    } 
-  });
-}
+        
+        const MASTER_PASSWORD = 'wlslwlsl12!@'; 
+        
+        if (isExistingUser === true) { 
+            const savedPw = localStorage.getItem(generatePasswordKey(typedName));
+            if (typedPw !== MASTER_PASSWORD && savedPw !== typedPw) { 
+                msgElem.textContent = '❌ 비밀번호가 틀렸습니다.'; 
+                msgElem.style.color = 'var(--c1)'; 
+                return; 
+            } 
+        } else { 
+            if (typedPw.length < 4) { 
+                alert('비밀번호는 4자 이상이어야 합니다'); 
+                return; 
+            } 
+            if (typedPw !== typedPw2) { 
+                msgElem.textContent = '❌ 비밀번호가 일치하지 않습니다.'; 
+                msgElem.style.color = 'var(--c1)'; 
+                return; 
+            } 
+            localStorage.setItem(generatePasswordKey(typedName), typedPw); 
+        } 
+        
+        currentLoggedInUser = typedName; 
+        localStorage.setItem('ted-user-v5', typedName); 
+        
+        document.getElementById('user-chip').textContent = '@' + typedName; 
+        document.getElementById('page-login').classList.remove('active'); 
+        document.getElementById('page-dash').classList.add('active'); 
+        
+        fetchDatabaseData(); 
+    }
 
-// ==========================================
-// 🛠️ 7. 추가/수정 모달 및 데이터 삭제/저장
-// ==========================================
-function buildEmojiGrid() { 
-  const grid = document.getElementById('emoji-grid'); 
-  grid.innerHTML = ''; 
-  
-  EMOJIS.forEach(e => { 
-    const btn = document.createElement('button'); 
-    btn.className = 'emoji-btn' + (e === selectedEmoji ? ' selected' : ''); 
-    btn.textContent = e; 
-    btn.type = 'button'; 
-    btn.onclick = () => { 
-      selectedEmoji = e; 
-      document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected')); 
-      btn.classList.add('selected'); 
-    }; 
-    grid.appendChild(btn); 
-  }); 
-}
+    function executeLogout() { 
+        switchMainView('home'); 
+        
+        document.getElementById('page-dash').classList.remove('active'); 
+        document.getElementById('page-login').classList.add('active'); 
+        
+        document.getElementById('login-name').value = ''; 
+        document.getElementById('login-pw').value = ''; 
+        document.getElementById('login-pw2').value = ''; 
+        document.getElementById('pw-section').style.display = 'none'; 
+        document.getElementById('login-msg').textContent = ''; 
+        document.getElementById('login-heading').textContent = '✏️ 닉네임을 입력하고 시작하세요'; 
+        
+        localStorage.removeItem('ted-user-v5');
+        currentLoggedInUser = '';
+    }
 
-function openAddModal() { 
-  editMode = false; 
-  selectedEmoji = EMOJIS[0]; 
-  document.getElementById('modal-title').textContent = '✨ 작품 추가'; 
-  document.getElementById('m-name').value = ''; 
-  document.getElementById('m-url').value = ''; 
-  buildEmojiGrid(); 
-  document.getElementById('modal-overlay').classList.add('open'); 
-}
+    // ---------------------------------------------------------
+    // 3. 화면 탭 전환 로직
+    // ---------------------------------------------------------
+    function switchMainView(tabName) {
+        const viewIds = ['view-home', 'view-detail', 'view-stats', 'view-trend'];
+        
+        for (let i = 0; i < viewIds.length; i++) {
+            document.getElementById(viewIds[i]).style.display = 'none';
+        }
+        
+        document.getElementById('tab-home').classList.remove('active');
+        document.getElementById('tab-stats').classList.remove('active');
+        document.getElementById('tab-trend').classList.remove('active');
 
-function openEditModal() { 
-  if (detailIdx < 0) return; 
-  
-  editMode = true; 
-  const w = worksData[detailIdx]; 
-  selectedEmoji = w.emoji; 
-  
-  document.getElementById('modal-title').textContent = '✏️ 작품 수정'; 
-  document.getElementById('m-name').value = w.name; 
-  document.getElementById('m-url').value = w.url; 
-  document.getElementById('m-topic').value = w.topic; 
-  
-  buildEmojiGrid(); 
-  document.getElementById('modal-overlay').classList.add('open'); 
-}
+        if (tabName === 'home') {
+            document.getElementById('view-home').style.display = 'block';
+            document.getElementById('tab-home').classList.add('active');
+        } else if (tabName === 'stats') {
+            document.getElementById('view-stats').style.display = 'block';
+            document.getElementById('tab-stats').classList.add('active');
+            renderStatsDashboard();
+        } else if (tabName === 'trend') {
+            document.getElementById('view-trend').style.display = 'block';
+            document.getElementById('tab-trend').classList.add('active');
+            renderGlobalTrendDashboard();
+        } else if (tabName === 'detail') {
+            document.getElementById('view-detail').style.display = 'block';
+            document.getElementById('tab-home').classList.add('active'); 
+        }
+    }
 
-function closeModal() { 
-  document.getElementById('modal-overlay').classList.remove('open'); 
-}
+    // ---------------------------------------------------------
+    // 4. 수파베이스 데이터 불러오기 및 최신값 필터링
+    // ---------------------------------------------------------
+    async function fetchDatabaseData() {
+        const response = await supabaseClient.from('works').select('*').order('id', { ascending: false });
+        
+        if (response.error) { 
+            console.error(response.error); 
+            return; 
+        }
+        
+        completeHistoryData = response.data || [];
+        
+        // 내 작품 필터링
+        const rawMyWorks = completeHistoryData.filter(function(row) { 
+            return row.username === currentLoggedInUser; 
+        });
+        userWorksArray = filterOnlyLatestRecords(rawMyWorks);
+        
+        const countSpan = document.getElementById('works-count');
+        countSpan.textContent = '(' + userWorksArray.length + '개)';
+        
+        // 봇이 자동 수집한 인기 트렌드 작품 필터링 (TED_TREND_BOT 계정)
+        const rawBotWorks = completeHistoryData.filter(function(row) { 
+            return row.username === 'TED_TREND_BOT'; 
+        });
+        botCollectedTrendWorksArray = filterOnlyLatestRecords(rawBotWorks);
 
-function closeModalOnOverlay(e) { 
-  if (e.target === document.getElementById('modal-overlay')) {
-    closeModal(); 
-  }
-}
+        drawCardsToGrid('my-grid', userWorksArray, 'home-empty', 'MY_WORK');
+        drawCardsToGrid('bench-grid', botCollectedTrendWorksArray, 'trend-empty', 'BOT_WORK');
+        
+        if(document.getElementById('view-stats').style.display === 'block') {
+            renderStatsDashboard();
+        }
+        if(document.getElementById('view-trend').style.display === 'block') {
+            renderGlobalTrendDashboard();
+        }
+    }
 
-async function saveWork() { 
-  const name = document.getElementById('m-name').value.trim(); 
-  const url = document.getElementById('m-url').value.trim(); 
-  const topic = document.getElementById('m-topic').value; 
-  
-  if (!name || !url) { 
-    alert('작품 이름과 주소를 입력해 주세요'); 
-    return; 
-  } 
-  
-  if (editMode && detailIdx >= 0) { 
-    const w = worksData[detailIdx]; 
-    await supabaseClient.from('works').update({ 
-      work_name: name, 
-      entry_url: url, 
-      topic: topic, 
-      emoji: selectedEmoji 
-    }).eq('work_name', w.name); 
-    
-    closeModal(); 
-    switchView('home'); 
-    await loadWorks(); 
-  } else { 
-    await supabaseClient.from('works').insert([{ 
-      username: currentUser, 
-      work_name: name, 
-      entry_url: url, 
-      views: 0, 
-      likes: 0, 
-      comments: 0, 
-      bookmarks: 0, 
-      topic: topic, 
-      emoji: selectedEmoji 
-    }]); 
-    
-    closeModal(); 
-    alert('등록 완료!'); 
-    await loadWorks(); 
-  } 
-}
+    function filterOnlyLatestRecords(rawDataArray) {
+        const latestRecordsMap = {};
+        
+        for (let i = 0; i < rawDataArray.length; i++) {
+            const row = rawDataArray[i];
+            if (latestRecordsMap[row.entry_url] === undefined) {
+                latestRecordsMap[row.entry_url] = row;
+            }
+        }
+        
+        const uniqueValuesArray = Object.values(latestRecordsMap);
+        const processedArray = [];
+        const gradientColors = ['#FF6B6B,#FF922B', '#4D96FF,#9B5DE5', '#6BCB77,#00BBD4', '#FFD93D,#FF922B', '#9B5DE5,#F72585'];
+        
+        for (let j = 0; j < uniqueValuesArray.length; j++) {
+            const record = uniqueValuesArray[j];
+            processedArray.push({
+                name: record.work_name, 
+                url: record.entry_url, 
+                views: record.views || 0, 
+                likes: record.likes || 0,
+                topic: record.topic || '기타', 
+                emoji: record.emoji || '✨',
+                bg: 'linear-gradient(135deg, ' + gradientColors[j % gradientColors.length] + ')'
+            });
+        }
+        
+        return processedArray;
+    }
 
-async function deleteWork() { 
-  if (!confirm(`"${worksData[detailIdx].name}" 작품과 관련된 모든 데이터를 삭제할까요?`)) return; 
-  
-  await supabaseClient.from('works').delete().eq('work_name', worksData[detailIdx].name); 
-  
-  switchView('home'); 
-  await loadWorks(); 
-}
+    // ---------------------------------------------------------
+    // 5. 그리드에 카드 그리기 (내 작품 vs 봇 수집 작품)
+    // ---------------------------------------------------------
+    function drawCardsToGrid(containerId, dataArray, emptyStateId, cardType) {
+        const gridContainer = document.getElementById(containerId);
+        gridContainer.innerHTML = '';
+        
+        const emptyStateElement = document.getElementById(emptyStateId);
+        
+        if (dataArray.length === 0) {
+            emptyStateElement.style.display = 'block';
+        } else {
+            emptyStateElement.style.display = 'none';
+        }
 
-// 콤마 및 k 변환 포맷 함수
-function fmt(num) { 
-  if (!num) return 0; 
-  return num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toLocaleString(); 
-}
+        for (let i = 0; i < dataArray.length; i++) {
+            const item = dataArray[i];
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'work-card';
+            
+            // 내 작품은 상세 페이지로 연결
+            // 봇 작품은 [극한의 딥 다이브 분석기] 로 연결!
+            cardDiv.onclick = function() {
+                if (cardType === 'MY_WORK') {
+                    openMyWorkDetailView(i);
+                } else if (cardType === 'BOT_WORK') {
+                    executeDeepAnalysis(i);
+                }
+            };
+
+            const htmlString = 
+                '<div class="thumb-box" style="background:' + item.bg + ';">' + item.emoji + '</div>' +
+                '<div class="card-body">' +
+                    '<div class="card-title">' + item.name + '</div>' +
+                    '<div class="card-stats">' +
+                        '<span style="color:#4D96FF;">👁 ' + item.views.toLocaleString() + '</span>' +
+                        '<span style="color:#FF6B6B;">♥ ' + item.likes.toLocaleString() + '</span>' +
+                    '</div>' +
+                '</div>';
+                
+            cardDiv.innerHTML = htmlString;
+            gridContainer.appendChild(cardDiv);
+        }
+    }
+
+    // ---------------------------------------------------------
+    // 6. 상세 페이지 및 전체 통계 로직
+    // ---------------------------------------------------------
+    function openMyWorkDetailView(index) {
+        const selectedWork = userWorksArray[index];
+        currentDetailWorkName = selectedWork.name;
+        
+        switchMainView('detail');
+        
+        document.getElementById('d-thumb').style.background = selectedWork.bg;
+        document.getElementById('d-thumb').textContent = selectedWork.emoji;
+        document.getElementById('d-title').textContent = selectedWork.name;
+        document.getElementById('d-views').textContent = selectedWork.views.toLocaleString();
+        document.getElementById('d-likes').textContent = selectedWork.likes.toLocaleString();
+        
+        const linkElem = document.getElementById('d-link');
+        linkElem.href = selectedWork.url; 
+
+        const historyForThisWork = completeHistoryData.filter(function(row) { 
+            return row.entry_url === selectedWork.url; 
+        }).reverse();
+        
+        const chartLabels = [];
+        const chartDataViews = [];
+        
+        for (let i = 0; i < historyForThisWork.length; i++) {
+            const row = historyForThisWork[i];
+            const dateObj = new Date(row.created_at);
+            const month = dateObj.getMonth() + 1;
+            const day = dateObj.getDate();
+            const hours = dateObj.getHours();
+            const mins = String(dateObj.getMinutes()).padStart(2, '0');
+            
+            chartLabels.push(month + '/' + day + ' ' + hours + ':' + mins);
+            chartDataViews.push(row.views);
+        }
+        
+        if (detailLineChartObj !== null) {
+            detailLineChartObj.destroy();
+        }
+        
+        if (chartDataViews.length > 0) {
+            const ctx = document.getElementById('det-line').getContext('2d');
+            detailLineChartObj = new Chart(ctx, {
+                type: 'line',
+                data: { 
+                    labels: chartLabels, 
+                    datasets: [{ 
+                        label: '조회수', 
+                        data: chartDataViews, 
+                        borderColor: '#4D96FF', 
+                        backgroundColor: 'rgba(77, 150, 255, 0.1)', 
+                        borderWidth: 3, 
+                        pointRadius: 4, 
+                        fill: true, 
+                        tension: 0.2 
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { display: false } 
+                    } 
+                }
+            });
+        }
+    }
+
+    function renderStatsDashboard() {
+        if (userWorksArray.length === 0) {
+            document.getElementById('stats-empty').style.display = 'block';
+            document.getElementById('stats-content').style.display = 'none';
+            return;
+        }
+        
+        document.getElementById('stats-empty').style.display = 'none';
+        document.getElementById('stats-content').style.display = 'block';
+
+        const sortedWorks = [...userWorksArray];
+        sortedWorks.sort(function(a, b) { 
+            return b.views - a.views; 
+        });
+        
+        const rankBoard = document.getElementById('ranking-board'); 
+        rankBoard.innerHTML = '';
+        
+        const top3Works = sortedWorks.slice(0, 3);
+        const medals = ['🥇', '🥈', '🥉'];
+        
+        for (let i = 0; i < top3Works.length; i++) {
+            const w = top3Works[i];
+            const htmlLine = '<div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--border); font-weight:800; font-size:14px;">' +
+                             '<div>' + medals[i] + ' ' + w.name + '</div>' +
+                             '<div style="color:#4D96FF;">👁 ' + w.views.toLocaleString() + '</div>' +
+                             '</div>';
+            rankBoard.innerHTML += htmlLine;
+        }
+
+        const topicCountsMap = {}; 
+        for (let j = 0; j < userWorksArray.length; j++) {
+            const w = userWorksArray[j];
+            if (topicCountsMap[w.topic] === undefined) {
+                topicCountsMap[w.topic] = 0;
+            }
+            topicCountsMap[w.topic] += 1; 
+        }
+        
+        const topicNames = Object.keys(topicCountsMap); 
+        const topicCounts = [];
+        for (let k = 0; k < topicNames.length; k++) {
+            topicCounts.push(topicCountsMap[topicNames[k]]);
+        }
+        
+        if (statsDoughnutChartObj !== null) {
+            statsDoughnutChartObj.destroy(); 
+        }
+        
+        const doughnutCtx = document.getElementById('stats-doughnut').getContext('2d');
+        statsDoughnutChartObj = new Chart(doughnutCtx, { 
+            type: 'doughnut', 
+            data: { 
+                labels: topicNames, 
+                datasets: [{ 
+                    data: topicCounts, 
+                    backgroundColor: ['#4D96FF','#6BCB77','#FF922B','#9B5DE5','#FFB347'], 
+                    borderWidth: 0 
+                }] 
+            }, 
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { 
+                    legend: { position: 'right' } 
+                } 
+            } 
+        });
+    }
+
+    // ---------------------------------------------------------
+    // 7. 실시간 트렌드 오버뷰
+    // ---------------------------------------------------------
+    function renderGlobalTrendDashboard() {
+        if (botCollectedTrendWorksArray.length === 0) {
+            return;
+        }
+        
+        const datasetsArray = [];
+        const chartColors = ['#FF6B6B', '#4D96FF', '#6BCB77', '#FFB347', '#9B5DE5'];
+        let maxLabelsCount = 0;
+        
+        for (let i = 0; i < botCollectedTrendWorksArray.length; i++) {
+            const botWork = botCollectedTrendWorksArray[i];
+            const history = completeHistoryData.filter(function(r) { 
+                return r.entry_url === botWork.url; 
+            }).reverse();
+            
+            const viewPoints = [];
+            for (let j = 0; j < history.length; j++) {
+                viewPoints.push(history[j].views);
+            }
+            
+            if (viewPoints.length > maxLabelsCount) {
+                maxLabelsCount = viewPoints.length;
+            }
+            
+            let shortName = botWork.name;
+            if (shortName.length > 10) {
+                shortName = shortName.slice(0, 10) + '...';
+            }
+            
+            datasetsArray.push({ 
+                label: shortName, 
+                data: viewPoints, 
+                borderColor: chartColors[i % chartColors.length], 
+                borderWidth: 3, 
+                tension: 0.2, 
+                fill: false 
+            });
+        }
+
+        const xLabels = [];
+        for (let k = 1; k <= maxLabelsCount; k++) {
+            xLabels.push(k + '회차');
+        }
+
+        if (globalTrendLineChartObj !== null) {
+            globalTrendLineChartObj.destroy();
+        }
+        
+        const trendCtx = document.getElementById('trend-line').getContext('2d');
+        globalTrendLineChartObj = new Chart(trendCtx, {
+            type: 'line', 
+            data: { 
+                labels: xLabels, 
+                datasets: datasetsArray 
+            }, 
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false 
+            }
+        });
+    }
+
+    // ---------------------------------------------------------
+    // 🧠 8. AI 딥 다이브 분석기 (유명/비유명 그래프 겹치기 핵심 기능)
+    // ---------------------------------------------------------
+    function executeDeepAnalysis(botWorkIndex) {
+        // 1. 타겟 작품 데이터 준비
+        const targetWork = botCollectedTrendWorksArray[botWorkIndex];
+        const targetHistory = completeHistoryData.filter(function(row) { 
+            return row.entry_url === targetWork.url; 
+        }).reverse();
+        
+        // 2. 전체 봇 수집 작품을 조회수 기준으로 정렬 (대박/쪽박 가려내기)
+        const sortedBotWorks = [...botCollectedTrendWorksArray];
+        sortedBotWorks.sort(function(a, b) {
+            return b.views - a.views; // 내림차순 정렬
+        });
+
+        // 엔트리 최고 대박작 (상위 1등)과 최고 쪽박작 (꼴등) 추출
+        const topTierWork = sortedBotWorks[0];
+        const bottomTierWork = sortedBotWorks[sortedBotWorks.length - 1];
+
+        // 각 작품의 히스토리(과거 기록) 추출
+        const topTierHistory = completeHistoryData.filter(function(row) { 
+            return row.entry_url === topTierWork.url; 
+        }).reverse();
+        
+        const bottomTierHistory = completeHistoryData.filter(function(row) { 
+            return row.entry_url === bottomTierWork.url; 
+        }).reverse();
+
+        // 3. 차트에 그릴 배열 데이터 가공 (Views만 뽑아냄)
+        const targetViewsArray = [];
+        for (let i = 0; i < targetHistory.length; i++) {
+            targetViewsArray.push(targetHistory[i].views);
+        }
+        
+        const topViewsArray = [];
+        for (let j = 0; j < topTierHistory.length; j++) {
+            topViewsArray.push(topTierHistory[j].views);
+        }
+        
+        const bottomViewsArray = [];
+        for (let k = 0; k < bottomTierHistory.length; k++) {
+            bottomViewsArray.push(bottomTierHistory[k].views);
+        }
+
+        // X축(회차) 라벨을 가장 긴 데이터 기준에 맞춤
+        let maxLength = targetViewsArray.length;
+        if (topViewsArray.length > maxLength) maxLength = topViewsArray.length;
+        if (bottomViewsArray.length > maxLength) maxLength = bottomViewsArray.length;
+        
+        const compareLabels = [];
+        for (let m = 1; m <= maxLength; m++) {
+            compareLabels.push(m + '회차');
+        }
+
+        // 4. 수치 분석 및 AI 코멘트 생성 알고리즘
+        // 시청자 반응률(Engagement) = 좋아요 / 조회수 * 100
+        let engagementRate = 0;
+        if (targetWork.views > 0) {
+            engagementRate = (targetWork.likes / targetWork.views) * 100;
+        }
+
+        // 시간(회차)당 평균 성장 속도 (가장 최근 조회수 - 가장 옛날 조회수 / 기간)
+        let growthVelocity = 0;
+        if (targetViewsArray.length > 1) {
+            const firstView = targetViewsArray[0];
+            const lastView = targetViewsArray[targetViewsArray.length - 1];
+            growthVelocity = (lastView - firstView) / (targetViewsArray.length - 1);
+        }
+
+        // 화면 수치 바인딩
+        document.getElementById('report-growth').textContent = "시간당 " + growthVelocity.toFixed(1) + "회 📈";
+        document.getElementById('report-engagement').textContent = engagementRate.toFixed(1) + "% 💖";
+
+        // AI 평가 코멘트 생성 분기
+        let aiCommentHtml = "";
+        if (engagementRate > 10.0) {
+            aiCommentHtml = "💡 <b>AI 종합 평가:</b> 엄청난 반응률입니다! 조회수 대비 좋아요가 터지고 있습니다. <b>팬덤(매니아층)</b>이 확실히 잡힌 작품이니 이 작품의 감성과 코드를 철저히 분석하세요!";
+        } else if (growthVelocity > 50.0) {
+            aiCommentHtml = "💡 <b>AI 종합 평가:</b> 조회수 상승 속도가 무섭습니다. <b>어그로(썸네일/제목)</b>가 대성공한 케이스입니다. 클릭을 유발하는 문구를 벤치마킹하는 것이 좋습니다.";
+        } else if (growthVelocity < 5.0) {
+            aiCommentHtml = "💡 <b>AI 종합 평가:</b> 조회수 성장이 정체되어 있습니다. 아래쪽의 하위 10% 그래프(파란색)와 흐름이 비슷해지고 있습니다. 지루함을 타파할 새로운 전개가 필요해 보입니다.";
+        } else {
+            aiCommentHtml = "💡 <b>AI 종합 평가:</b> 매우 안정적인 정석 그래프를 그리고 있습니다. 롱런(Long-run)할 가능성이 높은 구성입니다.";
+        }
+        document.getElementById('ai-comment-box').innerHTML = aiCommentHtml;
+
+        // 모달창 띄우기
+        document.getElementById('deep-analysis-modal').classList.add('open');
+
+        // 5. 대망의 극한 대조 차트 그리기
+        if (deepAnalysisChartObj !== null) {
+            deepAnalysisChartObj.destroy();
+        }
+        
+        const compCtx = document.getElementById('deep-compare-line').getContext('2d');
+        
+        // 타겟(빨강), 상위1%(주황-골드), 하위10%(파랑) 설정
+        deepAnalysisChartObj = new Chart(compCtx, {
+            type: 'line',
+            data: {
+                labels: compareLabels,
+                datasets: [
+                    { 
+                        label: '🎯 현재 분석 타겟', 
+                        data: targetViewsArray, 
+                        borderColor: '#FF6B6B', 
+                        borderWidth: 4, 
+                        pointRadius: 6,
+                        fill: false 
+                    },
+                    { 
+                        label: '👑 상위 1% (대박 기준선)', 
+                        data: topViewsArray, 
+                        borderColor: '#FFD93D', 
+                        borderWidth: 3, 
+                        borderDash: [5, 5], // 점선 처리
+                        fill: false 
+                    },
+                    { 
+                        label: '🐢 하위 10% (쪽박 기준선)', 
+                        data: bottomViewsArray, 
+                        borderColor: '#4D96FF', 
+                        borderWidth: 3, 
+                        borderDash: [2, 4], // 촘촘한 점선 처리
+                        fill: false 
+                    }
+                ]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+            }
+        });
+    }
+
+    // ---------------------------------------------------------
+    // 9. 모달 제어 및 URL 저장, 삭제 로직
+    // ---------------------------------------------------------
+    function drawEmojiGridButtons() {
+        const gridContainer = document.getElementById('emoji-grid');
+        gridContainer.innerHTML = '';
+        
+        for (let i = 0; i < AVAILABLE_EMOJIS.length; i++) {
+            const emojiChar = AVAILABLE_EMOJIS[i];
+            const buttonElement = document.createElement('button');
+            buttonElement.className = 'emoji-btn';
+            
+            if (emojiChar === currentSelectedEmoji) {
+                buttonElement.classList.add('selected');
+            }
+            
+            buttonElement.textContent = emojiChar;
+            
+            buttonElement.onclick = function() {
+                currentSelectedEmoji = emojiChar;
+                const allEmojiButtons = document.querySelectorAll('.emoji-btn');
+                for (let j = 0; j < allEmojiButtons.length; j++) {
+                    allEmojiButtons[j].classList.remove('selected');
+                }
+                buttonElement.classList.add('selected');
+            };
+            
+            gridContainer.appendChild(buttonElement);
+        }
+    }
+
+    function openAddUrlModal() {
+        document.getElementById('m-url').value = '';
+        currentSelectedEmoji = AVAILABLE_EMOJIS[0];
+        drawEmojiGridButtons();
+        document.getElementById('add-modal').classList.add('open');
+    }
+
+    function closeAddModal() {
+        document.getElementById('add-modal').classList.remove('open');
+    }
+
+    function closeDeepAnalysisModal() {
+        document.getElementById('deep-analysis-modal').classList.remove('open');
+    }
+
+    async function saveMyURLToDatabase() {
+        const urlInputElem = document.getElementById('m-url');
+        const typedUrl = urlInputElem.value.trim();
+        
+        const topicSelectElem = document.getElementById('m-topic');
+        const selectedTopic = topicSelectElem.value;
+        
+        if (typedUrl === '' || typedUrl.includes('playentry.org') === false) { 
+            alert('올바른 엔트리 주소를 입력해 주세요!'); 
+            return; 
+        }
+
+        const recordObject = {
+            username: currentLoggedInUser, 
+            work_name: "⏳ 자동 수집 대기 중...", 
+            entry_url: typedUrl,
+            views: 0, 
+            likes: 0, 
+            comments: 0, 
+            bookmarks: 0, 
+            topic: selectedTopic, 
+            emoji: currentSelectedEmoji
+        };
+
+        const response = await supabaseClient.from('works').insert([recordObject]);
+        
+        if (response.error) {
+            console.error(response.error);
+            alert('저장에 실패했습니다.');
+            return;
+        }
+
+        closeAddModal();
+        alert('내 작품이 등록되었습니다! 봇이 30분 뒤 제목과 데이터를 채워 넣습니다.');
+        fetchDatabaseData();
+    }
+
+    async function deleteCurrentWork() {
+        const isConfirmed = confirm('정말 삭제하시겠습니까?');
+        if (isConfirmed === false) {
+            return;
+        }
+        
+        const response = await supabaseClient.from('works').delete().eq('work_name', currentDetailWorkName);
+        
+        if (response.error) {
+            console.error(response.error);
+            alert('삭제에 실패했습니다.');
+            return;
+        }
+        
+        switchMainView('home');
+        fetchDatabaseData();
+    }
 </script>
 </body>
 </html>
