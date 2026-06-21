@@ -11,7 +11,7 @@
 
     <style>
         /* =========================================================
-           🎨 1. 테마 스펙 및 전역 디자인 정의 (정석 코딩)
+           🎨 1. 테마 스펙 및 전역 디자인 정의
         ========================================================= */
         :root {
             --c1: #FF6B6B; 
@@ -403,8 +403,112 @@
         }
 
         /* =========================================================
-           🛠️ 6. 하이 테크닉 빅데이터 리포트 팝업 모달
+           🛠️ 6. 팝업창(모달) 구조 숨김 및 디자인 (복구 완료!!!)
         ========================================================= */
+        .modal-overlay { 
+            display: none; /* 평소에는 숨겨주는 핵심 마법 코드 */
+            position: fixed; 
+            inset: 0; 
+            z-index: 100; 
+            background: rgba(26, 26, 46, 0.5); 
+            backdrop-filter: blur(4px); 
+            align-items: center; 
+            justify-content: center; 
+            padding: 1rem; 
+        } 
+
+        .modal-overlay.open { 
+            display: flex; /* 버튼을 누르면 나타남 */
+        }
+
+        .modal { 
+            background: var(--card); 
+            border: 1.5px solid var(--border); 
+            border-radius: var(--radius); 
+            padding: 1.8rem; 
+            width: 100%; 
+            max-width: 500px; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+        }
+
+        .modal-title { 
+            font-size: 16px; 
+            font-weight: 900; 
+            margin-bottom: 1.4rem; 
+        } 
+
+        .mfield { 
+            margin-bottom: 12px; 
+        }
+
+        .mfield label { 
+            display: block; 
+            font-size: 12px; 
+            font-weight: 800; 
+            color: var(--text2); 
+            margin-bottom: 5px; 
+        } 
+
+        .mfield input, .mfield select { 
+            width: 100%; 
+            padding: 10px 13px; 
+            font-size: 14px; 
+            border: 1.5px solid var(--border); 
+            border-radius: var(--radius-sm); 
+            background: var(--bg2); 
+            outline: none;
+        } 
+
+        .modal-actions { 
+            display: flex; 
+            gap: 8px; 
+            margin-top: 16px; 
+        } 
+
+        .m-save { 
+            flex: 1; 
+            padding: 11px; 
+            background: linear-gradient(135deg, var(--c4), var(--c6)); 
+            color: #fff; 
+            border: none; 
+            border-radius: var(--radius-sm); 
+            font-weight: 800; 
+            cursor: pointer; 
+        } 
+
+        .m-cancel { 
+            flex: 1; 
+            padding: 11px; 
+            background: none; 
+            border: 1.5px solid var(--border); 
+            color: var(--text2); 
+            border-radius: var(--radius-sm); 
+            font-weight: 800; 
+            cursor: pointer; 
+        }
+        
+        .emoji-grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 6px; 
+        } 
+
+        .emoji-btn { 
+            padding: 8px; 
+            font-size: 22px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            background: var(--bg2); 
+            border: 2px solid transparent; 
+        } 
+
+        .emoji-btn.selected { 
+            border-color: var(--c4); 
+            background: rgba(77, 150, 255, 0.12); 
+        }
+
+        /* 심층 분석 리포트 전용 스타일 */
         .report-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -674,7 +778,7 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1YW9ldGJramJ1b2t1Z3Byc3NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjY2MTIsImV4cCI6MjA5Njc0MjYxMn0.83uFvaO297axM7zUvvOR8odg7OuQX5m_kB7vcTz3q0M";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentLoggedInUser = localStorage.getItem('ted-user-final-v1') || '';
+    let currentLoggedInUser = localStorage.getItem('ted-user-final-v2') || '';
     
     let userWorksArray = [];
     let botCollectedTrendWorksArray = [];
@@ -784,7 +888,7 @@
         } 
         
         currentLoggedInUser = typedName; 
-        localStorage.setItem('ted-user-final-v1', typedName); 
+        localStorage.setItem('ted-user-final-v2', typedName); 
         
         document.getElementById('user-chip').textContent = '@' + typedName; 
         document.getElementById('page-login').classList.remove('active'); 
@@ -806,7 +910,7 @@
         document.getElementById('login-msg').textContent = ''; 
         document.getElementById('login-heading').textContent = '✏️ 닉네임을 입력하고 시작하세요'; 
         
-        localStorage.removeItem('ted-user-final-v1');
+        localStorage.removeItem('ted-user-final-v2');
         currentLoggedInUser = '';
     }
 
@@ -1064,7 +1168,6 @@
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } } 
         });
 
-        // [복구완료] 전체 작품 조회수 비교 막대그래프
         const wrapH = Math.max(200, sortedWorks.length * 40 + 50);
         document.getElementById('stats-wrap1').style.height = wrapH + 'px';
         if (statsBarChartObj !== null) statsBarChartObj.destroy();
@@ -1081,7 +1184,6 @@
             options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
 
-        // [복구완료] 반응률 분석 산점도 차트
         if (statsScatterChartObj !== null) statsScatterChartObj.destroy();
         const scatterCtx = document.getElementById('stats-scatter').getContext('2d');
         const scatterData = [];
@@ -1091,7 +1193,7 @@
         statsScatterChartObj = new Chart(scatterCtx, {
             type: 'scatter',
             data: { datasets: [{ label: '작품', data: scatterData, backgroundColor: '#FF6B6B', pointRadius: 8 }] },
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c) { return context.raw.label + ': 👁' + context.raw.x + ' / ♥' + context.raw.y; } } } } }
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return context.raw.label + ': 👁' + context.raw.x + ' / ♥' + context.raw.y; } } } } }
         });
     }
 
@@ -1101,7 +1203,6 @@
         const chartColors = ['#FF6B6B', '#4D96FF', '#6BCB77', '#FFB347', '#9B5DE5'];
         let maxLabelsCount = 0;
         
-        // 상위 5개 라인 노출
         const limitArray = botCollectedTrendWorksArray.slice(0, 5);
         for (let i = 0; i < limitArray.length; i++) {
             const botWork = limitArray[i];
@@ -1123,17 +1224,15 @@
     }
 
     // ---------------------------------------------------------
-    // 🧠 8. AI 딥 다이브 익스트림 대조분석 엔진 (도플갱어 완전형)
+    // 🧠 8. AI 딥 다이브 익스트림 대조분석 엔진
     // ---------------------------------------------------------
     function executeDeepAnalysis(botWorkIndex) {
         const targetWork = botCollectedTrendWorksArray[botWorkIndex];
         const targetHistory = completeHistoryData.filter(function(row) { return row.entry_url === targetWork.url; }).reverse();
         
-        // 공장이 모아온 빅데이터 창고 전체 확보
         const allTopTierWorks = completeHistoryData.filter(function(row) { return row.username === '@BIGDATA_TOP'; });
         const allBottomTierWorks = completeHistoryData.filter(function(row) { return row.username === '@BIGDATA_BOTTOM'; });
 
-        // 실시간 조회수 내림차순 정렬을 통해 상위 1% 대박작, 하위 10% 쪽박작 추출
         const sortedTop = filterOnlyLatestRecords(allTopTierWorks).sort(function(a,b) { return b.views - a.views; });
         const sortedBottom = filterOnlyLatestRecords(allBottomTierWorks).sort(function(a,b) { return a.views - b.views; });
 
