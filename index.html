@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TED – The Entry Data (Deep Analysis Engine)</title>
+    <title>TED – Entry BigData Analytics Platform</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -11,7 +11,7 @@
 
     <style>
         /* =========================================================
-           🎨 1. 전역 변수 및 테마 색상 (단축 없이 풀어서 작성)
+           🎨 1. 테마 스펙 및 전역 디자인 정의 (정석 코딩)
         ========================================================= */
         :root {
             --c1: #FF6B6B; 
@@ -70,7 +70,7 @@
         }
 
         /* =========================================================
-           🔐 2. 로그인 화면 레이아웃
+           🔐 2. 보안인증 및 로그인 구역 CSS
         ========================================================= */
         .login-bg { 
             min-height: 100vh; 
@@ -141,7 +141,7 @@
         }
 
         /* =========================================================
-           📱 3. 메인 상단바 (네비게이션)
+           📱 3. 컨트롤 상단 제어바 CSS
         ========================================================= */
         .topbar { 
             display: flex; 
@@ -210,7 +210,7 @@
         }
 
         /* =========================================================
-           🖼️ 4. 공통 레이아웃 및 작품 카드 그리드
+           🖼️ 4. 그리드 메인 대시보드 인프라
         ========================================================= */
         .main, .detail, .stats { 
             padding: 20px; 
@@ -316,7 +316,7 @@
         }
 
         /* =========================================================
-           🔍 5. 상세 페이지 (내 작품 전용)
+           🔍 5. 상세 페이지 (내 작품 단독 통계)
         ========================================================= */
         .back-btn { 
             display: inline-flex; 
@@ -403,111 +403,8 @@
         }
 
         /* =========================================================
-           🛠️ 6. 팝업 모달창 공통 (입력창 및 딥 분석기)
+           🛠️ 6. 하이 테크닉 빅데이터 리포트 팝업 모달
         ========================================================= */
-        .modal-overlay { 
-            display: none; 
-            position: fixed; 
-            inset: 0; 
-            z-index: 100; 
-            background: rgba(26, 26, 46, 0.5); 
-            backdrop-filter: blur(4px); 
-            align-items: center; 
-            justify-content: center; 
-            padding: 1rem; 
-        } 
-
-        .modal-overlay.open { 
-            display: flex; 
-        }
-
-        .modal { 
-            background: var(--card); 
-            border: 1.5px solid var(--border); 
-            border-radius: var(--radius); 
-            padding: 1.8rem; 
-            width: 100%; 
-            max-width: 500px; 
-            max-height: 90vh; 
-            overflow-y: auto; 
-        }
-
-        .modal-title { 
-            font-size: 16px; 
-            font-weight: 900; 
-            margin-bottom: 1.4rem; 
-        } 
-
-        .mfield { 
-            margin-bottom: 12px; 
-        }
-
-        .mfield label { 
-            display: block; 
-            font-size: 12px; 
-            font-weight: 800; 
-            color: var(--text2); 
-            margin-bottom: 5px; 
-        } 
-
-        .mfield input, .mfield select { 
-            width: 100%; 
-            padding: 10px 13px; 
-            font-size: 14px; 
-            border: 1.5px solid var(--border); 
-            border-radius: var(--radius-sm); 
-            background: var(--bg2); 
-        } 
-
-        .modal-actions { 
-            display: flex; 
-            gap: 8px; 
-            margin-top: 16px; 
-        } 
-
-        .m-save { 
-            flex: 1; 
-            padding: 11px; 
-            background: linear-gradient(135deg, var(--c4), var(--c6)); 
-            color: #fff; 
-            border: none; 
-            border-radius: var(--radius-sm); 
-            font-weight: 800; 
-            cursor: pointer; 
-        } 
-
-        .m-cancel { 
-            flex: 1; 
-            padding: 11px; 
-            background: none; 
-            border: 1.5px solid var(--border); 
-            color: var(--text2); 
-            border-radius: var(--radius-sm); 
-            font-weight: 800; 
-            cursor: pointer; 
-        }
-        
-        .emoji-grid { 
-            display: grid; 
-            grid-template-columns: repeat(5, 1fr); 
-            gap: 6px; 
-        } 
-
-        .emoji-btn { 
-            padding: 8px; 
-            font-size: 22px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            background: var(--bg2); 
-            border: 2px solid transparent; 
-        } 
-
-        .emoji-btn.selected { 
-            border-color: var(--c4); 
-            background: rgba(77, 150, 255, 0.12); 
-        }
-
-        /* 심층 분석 리포트 전용 스타일 */
         .report-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -549,7 +446,7 @@
     <div id="page-login" class="page active">
         <div class="login-bg">
             <div class="ted-logo">TED</div>
-            <div class="ted-sub">Analysis Engine</div>
+            <div class="ted-sub">BigData Engine</div>
             
             <div class="login-card">
                 <h2 id="login-heading" style="font-size:15px; font-weight:900; color:var(--text2);">
@@ -600,7 +497,7 @@
             </div>
             
             <div id="home-empty" class="empty-state">
-                내 작품 URL을 등록하면 봇이 30분마다 순찰하며 데이터를 수집합니다!
+                내 작품 URL을 등록하면 봇이 30분마다 감시하여 기록을 쌓습니다!
             </div>
             
             <div class="works-grid" id="my-grid"></div>
@@ -629,6 +526,13 @@
             </div>
             
             <div class="chart-card">
+                <div class="chart-card-title">📊 현재 반응 지표</div>
+                <div style="position:relative; width:100%; height:200px;">
+                    <canvas id="det-bar"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
                 <div class="chart-card-title">📈 성장 발자취 (조회수 누적 그래프)</div>
                 <div style="position:relative; width:100%; height:220px;">
                     <canvas id="det-line"></canvas>
@@ -651,27 +555,41 @@
                         <canvas id="stats-doughnut"></canvas>
                     </div>
                 </div>
+
+                <div class="chart-card">
+                    <div class="chart-card-title">📈 전체 작품 조회수 입체 비교</div>
+                    <div style="position:relative; width:100%;" id="stats-wrap1">
+                        <canvas id="stats-bar"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-card-title">💛 반응률 심층 분석 (좋아요 vs 조회수 비율)</div>
+                    <div style="position:relative; width:100%; height:240px;">
+                        <canvas id="stats-scatter"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div id="view-trend" class="main" style="display:none;">
             <div class="add-bar">
-                <div style="font-size:16px; font-weight:900; color:var(--text2);">🕵️‍♂️ 엔트리 전체 트렌드 자동 분석</div>
+                <div style="font-size:16px; font-weight:900; color:var(--text2);">🕵️‍♂️ TED-BigData 공장 실시간 파이프라인</div>
             </div>
             
             <div class="chart-card">
-                <div style="font-size:14px; font-weight:800; margin-bottom:10px;">📈 실시간 핫(Hot) 트렌드 그래프 모아보기</div>
+                <div style="font-size:14px; font-weight:800; margin-bottom:10px;">📈 공장이 가동한 순수 인기작 100개 트렌드 오버뷰</div>
                 <div style="position:relative; width:100%; height:250px;">
                     <canvas id="trend-line"></canvas>
                 </div>
             </div>
 
             <div style="font-size:14px; font-weight:900; color:var(--text2); margin:20px 0 10px;">
-                📌 봇이 수집한 인기 타겟 (카드를 클릭하여 극한의 대조 분석을 실행하세요!)
+                📌 공장 채굴 타겟 목록 (클릭하면 대박 100개 vs 쪽박 100개 극한 대조 팝업 리포트가 열립니다!)
             </div>
             
             <div id="trend-empty" class="empty-state">
-                봇이 아직 데이터를 수집 중입니다. (파이썬 봇을 한 번 실행해 주세요)
+                빅데이터 공장 저장소의 워크플로우를 먼저 작동시켜 주시거나 30분만 기다려 주세요!
             </div>
             
             <div class="works-grid" id="bench-grid"></div>
@@ -682,7 +600,7 @@
         <div class="modal">
             <div class="modal-title" id="m-title">✨ 내 작품 URL 원터치 등록</div>
             <p style="font-size:12px; color:var(--text3); margin-bottom:15px;">
-                작품 주소만 넣으세요! 봇이 30분 뒤 제목을 알아서 긁어옵니다.
+                작품 주소만 넣으세요! 봇이 30분 뒤 제목과 데이터를 전부 알아서 긁어옵니다.
             </p>
             
             <div class="mfield">
@@ -694,14 +612,15 @@
                 <label>📁 분류 테마</label>
                 <select id="m-topic">
                     <option value="게임">🎮 게임</option>
+                    <option value="지식공유">📚 지식공유</option>
                     <option value="스토리/만화">🎬 스토리/만화</option>
                     <option value="생활/유틸">🔧 생활/유틸</option>
-                    <option value="타이포/예술">🎨 타이포/예술</option>
+                    <option value="예술">🎨 타이포/예술</option>
                 </select>
             </div>
 
             <div class="mfield">
-                <label>🌟 대표 이모지 (15종)</label>
+                <label>🌟 대표 이모지 선택 (15종)</label>
                 <div class="emoji-grid" id="emoji-grid"></div>
             </div>
             
@@ -714,48 +633,48 @@
 
     <div class="modal-overlay" id="deep-analysis-modal">
         <div class="modal" style="max-width: 650px;">
-            <div class="modal-title">🧠 AI 딥 다이브 분석 리포트</div>
+            <div class="modal-title">🧠 AI 빅데이터 딥 다이브 익스트림 리포트</div>
             <p style="font-size:13px; color:var(--text2); margin-bottom:15px;">
-                선택하신 타겟 작품을 현재 엔트리의 <b>가장 인기 있는 대박 작품(상위 1%)</b>, <b>가장 성장이 멈춘 쪽박 작품(하위 10%)</b>과 동시에 겹쳐서 비교 분석합니다.
+                공장이 스크롤 수집한 <b>순수 인기작 100개(@BIGDATA_TOP)</b>의 최정상 데이터와 <b>모든 작품 100개(@BIGDATA_BOTTOM)</b>의 최하위 데이터를 겹쳐서 비교분석합니다.
             </p>
             
             <div class="report-grid">
                 <div class="report-box">
-                    <div class="report-label">타겟 작품 평균 성장 속도</div>
-                    <div class="report-value" id="report-growth">계산 중...</div>
+                    <div class="report-label">선택한 타겟 성장 기울기</div>
+                    <div class="report-value" id="report-growth">분석 중...</div>
                 </div>
                 <div class="report-box">
-                    <div class="report-label">타겟 작품 시청자 반응률 (좋아요/조회수)</div>
-                    <div class="report-value" id="report-engagement" style="color:#FF6B6B;">계산 중...</div>
+                    <div class="report-label">타겟 유저 반응률 (좋아요율)</div>
+                    <div class="report-value" id="report-engagement" style="color:#FF6B6B;">분석 중...</div>
                 </div>
             </div>
 
             <div class="ai-comment-box" id="ai-comment-box">
-                💡 <b>AI 종합 평가:</b> 데이터를 분석하고 있습니다...
+                💡 <b>AI 종합 평가 리포트:</b> 로딩 중...
             </div>
 
             <div style="font-size:12px; font-weight:800; color:var(--text3); margin-bottom:5px;">
-                📊 성장 궤적 대조 그래프 (타겟 vs 대박작 vs 쪽박작)
+                📊 100 대 100 익스트림 스케일 비교 그래프 (타겟작 vs 대박작 백프론트 vs 쪽박작 백프론트)
             </div>
             <div style="position:relative; width:100%; height:280px; margin-bottom:15px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px;">
                 <canvas id="deep-compare-line"></canvas>
             </div>
             
             <div class="modal-actions">
-                <button class="m-cancel" style="width:100%;" onclick="closeDeepAnalysisModal()">리포트 닫기</button>
+                <button class="m-cancel" style="width:100%;" onclick="closeDeepAnalysisModal()">분석창 닫기</button>
             </div>
         </div>
     </div>
 
 <script>
     // ---------------------------------------------------------
-    // 1. 수파베이스 설정 및 전역 변수 초기화
+    // 1. 전역 시스템 인스턴스 셋업
     // ---------------------------------------------------------
     const SUPABASE_URL = "https://xuaoetbkjbuokugprssl.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1YW9ldGJramJ1b2t1Z3Byc3NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjY2MTIsImV4cCI6MjA5Njc0MjYxMn0.83uFvaO297axM7zUvvOR8odg7OuQX5m_kB7vcTz3q0M";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentLoggedInUser = localStorage.getItem('ted-user-v5') || '';
+    let currentLoggedInUser = localStorage.getItem('ted-user-final-v1') || '';
     
     let userWorksArray = [];
     let botCollectedTrendWorksArray = [];
@@ -767,12 +686,15 @@
     const AVAILABLE_EMOJIS = ['🎮','🚀','🌿','⭐','🎨','🌊','🌸','🍀','🔥','💎','🎯','🏆','🎭','🦄','🐱'];
     
     let detailLineChartObj = null;
+    let detailBarChartObj = null; 
     let statsDoughnutChartObj = null;
+    let statsBarChartObj = null; 
+    let statsScatterChartObj = null; 
     let globalTrendLineChartObj = null;
-    let deepAnalysisChartObj = null; // 딥 다이브 분석용 차트 객체
+    let deepAnalysisChartObj = null;
 
     // ---------------------------------------------------------
-    // 2. 로그인 및 회원가입 로직
+    // 2. 가입 및 계정 세션 보존부
     // ---------------------------------------------------------
     if (currentLoggedInUser !== '') {
         document.getElementById('user-chip').textContent = '@' + currentLoggedInUser;
@@ -782,7 +704,7 @@
     }
 
     function generatePasswordKey(username) { 
-        return 'ted-pw-v5-' + username; 
+        return 'ted-pw-final-' + username; 
     }
 
     function handleNameInput() { 
@@ -862,7 +784,7 @@
         } 
         
         currentLoggedInUser = typedName; 
-        localStorage.setItem('ted-user-v5', typedName); 
+        localStorage.setItem('ted-user-final-v1', typedName); 
         
         document.getElementById('user-chip').textContent = '@' + typedName; 
         document.getElementById('page-login').classList.remove('active'); 
@@ -884,12 +806,12 @@
         document.getElementById('login-msg').textContent = ''; 
         document.getElementById('login-heading').textContent = '✏️ 닉네임을 입력하고 시작하세요'; 
         
-        localStorage.removeItem('ted-user-v5');
+        localStorage.removeItem('ted-user-final-v1');
         currentLoggedInUser = '';
     }
 
     // ---------------------------------------------------------
-    // 3. 화면 탭 전환 로직
+    // 3. 서브 탭 제어 엔진
     // ---------------------------------------------------------
     function switchMainView(tabName) {
         const viewIds = ['view-home', 'view-detail', 'view-stats', 'view-trend'];
@@ -920,7 +842,7 @@
     }
 
     // ---------------------------------------------------------
-    // 4. 수파베이스 데이터 불러오기 및 최신값 필터링
+    // 4. 데이터베이스 스트리밍 및 캐시 중복 처리
     // ---------------------------------------------------------
     async function fetchDatabaseData() {
         const response = await supabaseClient.from('works').select('*').order('id', { ascending: false });
@@ -932,7 +854,6 @@
         
         completeHistoryData = response.data || [];
         
-        // 내 작품 필터링
         const rawMyWorks = completeHistoryData.filter(function(row) { 
             return row.username === currentLoggedInUser; 
         });
@@ -941,9 +862,9 @@
         const countSpan = document.getElementById('works-count');
         countSpan.textContent = '(' + userWorksArray.length + '개)';
         
-        // 봇이 자동 수집한 인기 트렌드 작품 필터링 (TED_TREND_BOT 계정)
+        // [물리적 분리] 별도 빅데이터 저장소에서 채굴한 @BIGDATA_TOP만 가져옴!
         const rawBotWorks = completeHistoryData.filter(function(row) { 
-            return row.username === 'TED_TREND_BOT'; 
+            return row.username === '@BIGDATA_TOP'; 
         });
         botCollectedTrendWorksArray = filterOnlyLatestRecords(rawBotWorks);
 
@@ -979,6 +900,8 @@
                 url: record.entry_url, 
                 views: record.views || 0, 
                 likes: record.likes || 0,
+                comments: record.comments || 0,   
+                bookmarks: record.bookmarks || 0, 
                 topic: record.topic || '기타', 
                 emoji: record.emoji || '✨',
                 bg: 'linear-gradient(135deg, ' + gradientColors[j % gradientColors.length] + ')'
@@ -988,9 +911,6 @@
         return processedArray;
     }
 
-    // ---------------------------------------------------------
-    // 5. 그리드에 카드 그리기 (내 작품 vs 봇 수집 작품)
-    // ---------------------------------------------------------
     function drawCardsToGrid(containerId, dataArray, emptyStateId, cardType) {
         const gridContainer = document.getElementById(containerId);
         gridContainer.innerHTML = '';
@@ -1008,8 +928,6 @@
             const cardDiv = document.createElement('div');
             cardDiv.className = 'work-card';
             
-            // 내 작품은 상세 페이지로 연결
-            // 봇 작품은 [극한의 딥 다이브 분석기] 로 연결!
             cardDiv.onclick = function() {
                 if (cardType === 'MY_WORK') {
                     openMyWorkDetailView(i);
@@ -1033,9 +951,6 @@
         }
     }
 
-    // ---------------------------------------------------------
-    // 6. 상세 페이지 및 전체 통계 로직
-    // ---------------------------------------------------------
     function openMyWorkDetailView(index) {
         const selectedWork = userWorksArray[index];
         currentDetailWorkName = selectedWork.name;
@@ -1048,8 +963,29 @@
         document.getElementById('d-views').textContent = selectedWork.views.toLocaleString();
         document.getElementById('d-likes').textContent = selectedWork.likes.toLocaleString();
         
-        const linkElem = document.getElementById('d-link');
-        linkElem.href = selectedWork.url; 
+        document.getElementById('d-link').href = selectedWork.url; 
+
+        if (detailBarChartObj !== null) {
+            detailBarChartObj.destroy();
+        }
+        
+        const detBarCtx = document.getElementById('det-bar').getContext('2d');
+        detailBarChartObj = new Chart(detBarCtx, {
+            type: 'bar',
+            data: {
+                labels: ['조회수', '좋아요', '댓글', '북마크'],
+                datasets: [{
+                    data: [selectedWork.views, selectedWork.likes, selectedWork.comments, selectedWork.bookmarks],
+                    backgroundColor: ['#4D96FF', '#FF6B6B', '#6BCB77', '#FFB347'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
 
         const historyForThisWork = completeHistoryData.filter(function(row) { 
             return row.entry_url === selectedWork.url; 
@@ -1061,12 +997,7 @@
         for (let i = 0; i < historyForThisWork.length; i++) {
             const row = historyForThisWork[i];
             const dateObj = new Date(row.created_at);
-            const month = dateObj.getMonth() + 1;
-            const day = dateObj.getDate();
-            const hours = dateObj.getHours();
-            const mins = String(dateObj.getMinutes()).padStart(2, '0');
-            
-            chartLabels.push(month + '/' + day + ' ' + hours + ':' + mins);
+            chartLabels.push((dateObj.getMonth() + 1) + '/' + dateObj.getDate() + ' ' + dateObj.getHours() + ':' + String(dateObj.getMinutes()).padStart(2, '0'));
             chartDataViews.push(row.views);
         }
         
@@ -1080,24 +1011,9 @@
                 type: 'line',
                 data: { 
                     labels: chartLabels, 
-                    datasets: [{ 
-                        label: '조회수', 
-                        data: chartDataViews, 
-                        borderColor: '#4D96FF', 
-                        backgroundColor: 'rgba(77, 150, 255, 0.1)', 
-                        borderWidth: 3, 
-                        pointRadius: 4, 
-                        fill: true, 
-                        tension: 0.2 
-                    }] 
+                    datasets: [{ label: '조회수', data: chartDataViews, borderColor: '#4D96FF', backgroundColor: 'rgba(77, 150, 255, 0.1)', borderWidth: 3, pointRadius: 4, fill: true, tension: 0.2 }] 
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { 
-                        legend: { display: false } 
-                    } 
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
     }
@@ -1113,9 +1029,7 @@
         document.getElementById('stats-content').style.display = 'block';
 
         const sortedWorks = [...userWorksArray];
-        sortedWorks.sort(function(a, b) { 
-            return b.views - a.views; 
-        });
+        sortedWorks.sort(function(a, b) { return b.views - a.views; });
         
         const rankBoard = document.getElementById('ranking-board'); 
         rankBoard.innerHTML = '';
@@ -1125,357 +1039,191 @@
         
         for (let i = 0; i < top3Works.length; i++) {
             const w = top3Works[i];
-            const htmlLine = '<div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--border); font-weight:800; font-size:14px;">' +
+            rankBoard.innerHTML += '<div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--border); font-weight:800; font-size:14px;">' +
                              '<div>' + medals[i] + ' ' + w.name + '</div>' +
                              '<div style="color:#4D96FF;">👁 ' + w.views.toLocaleString() + '</div>' +
                              '</div>';
-            rankBoard.innerHTML += htmlLine;
         }
 
         const topicCountsMap = {}; 
         for (let j = 0; j < userWorksArray.length; j++) {
             const w = userWorksArray[j];
-            if (topicCountsMap[w.topic] === undefined) {
-                topicCountsMap[w.topic] = 0;
-            }
+            if (topicCountsMap[w.topic] === undefined) topicCountsMap[w.topic] = 0;
             topicCountsMap[w.topic] += 1; 
         }
         
         const topicNames = Object.keys(topicCountsMap); 
         const topicCounts = [];
-        for (let k = 0; k < topicNames.length; k++) {
-            topicCounts.push(topicCountsMap[topicNames[k]]);
-        }
+        for (let k = 0; k < topicNames.length; k++) topicCounts.push(topicCountsMap[topicNames[k]]);
         
-        if (statsDoughnutChartObj !== null) {
-            statsDoughnutChartObj.destroy(); 
-        }
-        
+        if (statsDoughnutChartObj !== null) statsDoughnutChartObj.destroy(); 
         const doughnutCtx = document.getElementById('stats-doughnut').getContext('2d');
         statsDoughnutChartObj = new Chart(doughnutCtx, { 
             type: 'doughnut', 
-            data: { 
-                labels: topicNames, 
-                datasets: [{ 
-                    data: topicCounts, 
-                    backgroundColor: ['#4D96FF','#6BCB77','#FF922B','#9B5DE5','#FFB347'], 
-                    borderWidth: 0 
-                }] 
-            }, 
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                plugins: { 
-                    legend: { position: 'right' } 
-                } 
-            } 
+            data: { labels: topicNames, datasets: [{ data: topicCounts, backgroundColor: ['#4D96FF','#6BCB77','#FF922B','#9B5DE5','#FFB347'], borderWidth: 0 }] }, 
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } } 
+        });
+
+        // [복구완료] 전체 작품 조회수 비교 막대그래프
+        const wrapH = Math.max(200, sortedWorks.length * 40 + 50);
+        document.getElementById('stats-wrap1').style.height = wrapH + 'px';
+        if (statsBarChartObj !== null) statsBarChartObj.destroy();
+        
+        const barCtx = document.getElementById('stats-bar').getContext('2d');
+        const labelsArray = []; const dataArray = [];
+        for(let m = 0; m < sortedWorks.length; m++) {
+            labelsArray.push(sortedWorks[m].name.length > 8 ? sortedWorks[m].name.slice(0, 8) + '...' : sortedWorks[m].name);
+            dataArray.push(sortedWorks[m].views);
+        }
+        statsBarChartObj = new Chart(barCtx, {
+            type: 'bar',
+            data: { labels: labelsArray, datasets: [{ data: dataArray, backgroundColor: '#4D96FF', borderRadius: 4 }] },
+            options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // [복구완료] 반응률 분석 산점도 차트
+        if (statsScatterChartObj !== null) statsScatterChartObj.destroy();
+        const scatterCtx = document.getElementById('stats-scatter').getContext('2d');
+        const scatterData = [];
+        for(let p = 0; p < userWorksArray.length; p++) {
+            scatterData.push({ x: userWorksArray[p].views, y: userWorksArray[p].likes, label: userWorksArray[p].name });
+        }
+        statsScatterChartObj = new Chart(scatterCtx, {
+            type: 'scatter',
+            data: { datasets: [{ label: '작품', data: scatterData, backgroundColor: '#FF6B6B', pointRadius: 8 }] },
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c) { return context.raw.label + ': 👁' + context.raw.x + ' / ♥' + context.raw.y; } } } } }
         });
     }
 
-    // ---------------------------------------------------------
-    // 7. 실시간 트렌드 오버뷰
-    // ---------------------------------------------------------
     function renderGlobalTrendDashboard() {
-        if (botCollectedTrendWorksArray.length === 0) {
-            return;
-        }
-        
+        if (botCollectedTrendWorksArray.length === 0) return;
         const datasetsArray = [];
         const chartColors = ['#FF6B6B', '#4D96FF', '#6BCB77', '#FFB347', '#9B5DE5'];
         let maxLabelsCount = 0;
         
-        for (let i = 0; i < botCollectedTrendWorksArray.length; i++) {
-            const botWork = botCollectedTrendWorksArray[i];
-            const history = completeHistoryData.filter(function(r) { 
-                return r.entry_url === botWork.url; 
-            }).reverse();
-            
-            const viewPoints = [];
-            for (let j = 0; j < history.length; j++) {
-                viewPoints.push(history[j].views);
-            }
-            
-            if (viewPoints.length > maxLabelsCount) {
-                maxLabelsCount = viewPoints.length;
-            }
-            
-            let shortName = botWork.name;
-            if (shortName.length > 10) {
-                shortName = shortName.slice(0, 10) + '...';
-            }
+        // 상위 5개 라인 노출
+        const limitArray = botCollectedTrendWorksArray.slice(0, 5);
+        for (let i = 0; i < limitArray.length; i++) {
+            const botWork = limitArray[i];
+            const history = completeHistoryData.filter(function(r) { return r.entry_url === botWork.url; }).reverse();
+            const viewPoints = history.map(function(r) { return r.views; });
+            if (viewPoints.length > maxLabelsCount) maxLabelsCount = viewPoints.length;
             
             datasetsArray.push({ 
-                label: shortName, 
-                data: viewPoints, 
-                borderColor: chartColors[i % chartColors.length], 
-                borderWidth: 3, 
-                tension: 0.2, 
-                fill: false 
+                label: botWork.name.length > 10 ? botWork.name.slice(0, 10) + '...' : botWork.name, 
+                data: viewPoints, borderColor: chartColors[i % chartColors.length], borderWidth: 3, tension: 0.2, fill: false 
             });
         }
 
-        const xLabels = [];
-        for (let k = 1; k <= maxLabelsCount; k++) {
-            xLabels.push(k + '회차');
-        }
-
-        if (globalTrendLineChartObj !== null) {
-            globalTrendLineChartObj.destroy();
-        }
-        
-        const trendCtx = document.getElementById('trend-line').getContext('2d');
-        globalTrendLineChartObj = new Chart(trendCtx, {
-            type: 'line', 
-            data: { 
-                labels: xLabels, 
-                datasets: datasetsArray 
-            }, 
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false 
-            }
+        const xLabels = Array.from({length: maxLabelsCount}, function(_, k) { return (k + 1) + '회차'; });
+        if (globalTrendLineChartObj !== null) globalTrendLineChartObj.destroy();
+        globalTrendLineChartObj = new Chart(document.getElementById('trend-line').getContext('2d'), {
+            type: 'line', data: { labels: xLabels, datasets: datasetsArray }, options: { responsive: true, maintainAspectRatio: false }
         });
     }
 
     // ---------------------------------------------------------
-    // 🧠 8. AI 딥 다이브 분석기 (유명/비유명 그래프 겹치기 핵심 기능)
+    // 🧠 8. AI 딥 다이브 익스트림 대조분석 엔진 (도플갱어 완전형)
     // ---------------------------------------------------------
     function executeDeepAnalysis(botWorkIndex) {
-        // 1. 타겟 작품 데이터 준비
         const targetWork = botCollectedTrendWorksArray[botWorkIndex];
-        const targetHistory = completeHistoryData.filter(function(row) { 
-            return row.entry_url === targetWork.url; 
-        }).reverse();
+        const targetHistory = completeHistoryData.filter(function(row) { return row.entry_url === targetWork.url; }).reverse();
         
-        // 2. 전체 봇 수집 작품을 조회수 기준으로 정렬 (대박/쪽박 가려내기)
-        const sortedBotWorks = [...botCollectedTrendWorksArray];
-        sortedBotWorks.sort(function(a, b) {
-            return b.views - a.views; // 내림차순 정렬
-        });
+        // 공장이 모아온 빅데이터 창고 전체 확보
+        const allTopTierWorks = completeHistoryData.filter(function(row) { return row.username === '@BIGDATA_TOP'; });
+        const allBottomTierWorks = completeHistoryData.filter(function(row) { return row.username === '@BIGDATA_BOTTOM'; });
 
-        // 엔트리 최고 대박작 (상위 1등)과 최고 쪽박작 (꼴등) 추출
-        const topTierWork = sortedBotWorks[0];
-        const bottomTierWork = sortedBotWorks[sortedBotWorks.length - 1];
+        // 실시간 조회수 내림차순 정렬을 통해 상위 1% 대박작, 하위 10% 쪽박작 추출
+        const sortedTop = filterOnlyLatestRecords(allTopTierWorks).sort(function(a,b) { return b.views - a.views; });
+        const sortedBottom = filterOnlyLatestRecords(allBottomTierWorks).sort(function(a,b) { return a.views - b.views; });
 
-        // 각 작품의 히스토리(과거 기록) 추출
-        const topTierHistory = completeHistoryData.filter(function(row) { 
-            return row.entry_url === topTierWork.url; 
-        }).reverse();
-        
-        const bottomTierHistory = completeHistoryData.filter(function(row) { 
-            return row.entry_url === bottomTierWork.url; 
-        }).reverse();
+        const absoluteBest = sortedTop[0] || targetWork;
+        const absoluteWorst = sortedBottom[0] || targetWork;
 
-        // 3. 차트에 그릴 배열 데이터 가공 (Views만 뽑아냄)
-        const targetViewsArray = [];
-        for (let i = 0; i < targetHistory.length; i++) {
-            targetViewsArray.push(targetHistory[i].views);
-        }
-        
-        const topViewsArray = [];
-        for (let j = 0; j < topTierHistory.length; j++) {
-            topViewsArray.push(topTierHistory[j].views);
-        }
-        
-        const bottomViewsArray = [];
-        for (let k = 0; k < bottomTierHistory.length; k++) {
-            bottomViewsArray.push(bottomTierHistory[k].views);
-        }
+        const topHistory = completeHistoryData.filter(function(row) { return row.entry_url === absoluteBest.url; }).reverse();
+        const bottomHistory = completeHistoryData.filter(function(row) { return row.entry_url === absoluteWorst.url; }).reverse();
 
-        // X축(회차) 라벨을 가장 긴 데이터 기준에 맞춤
-        let maxLength = targetViewsArray.length;
-        if (topViewsArray.length > maxLength) maxLength = topViewsArray.length;
-        if (bottomViewsArray.length > maxLength) maxLength = bottomViewsArray.length;
-        
-        const compareLabels = [];
-        for (let m = 1; m <= maxLength; m++) {
-            compareLabels.push(m + '회차');
-        }
+        const targetViews = targetHistory.map(function(r) { return r.views; });
+        const topViews = topHistory.map(function(r) { return r.views; });
+        const bottomViews = bottomHistory.map(function(r) { return r.views; });
 
-        // 4. 수치 분석 및 AI 코멘트 생성 알고리즘
-        // 시청자 반응률(Engagement) = 좋아요 / 조회수 * 100
-        let engagementRate = 0;
-        if (targetWork.views > 0) {
-            engagementRate = (targetWork.likes / targetWork.views) * 100;
-        }
+        let maxLen = Math.max(targetViews.length, topViews.length, bottomViews.length);
+        const compareLabels = Array.from({length: maxLen}, function(_, m) { return (m + 1) + '회차'; });
 
-        // 시간(회차)당 평균 성장 속도 (가장 최근 조회수 - 가장 옛날 조회수 / 기간)
-        let growthVelocity = 0;
-        if (targetViewsArray.length > 1) {
-            const firstView = targetViewsArray[0];
-            const lastView = targetViewsArray[targetViewsArray.length - 1];
-            growthVelocity = (lastView - firstView) / (targetViewsArray.length - 1);
-        }
+        let engagementRate = targetWork.views > 0 ? (targetWork.likes / targetWork.views) * 100 : 0;
+        let growthVelocity = targetViews.length > 1 ? (targetViews[targetViews.length - 1] - targetViews[0]) / (targetViews.length - 1) : 0;
 
-        // 화면 수치 바인딩
-        document.getElementById('report-growth').textContent = "시간당 " + growthVelocity.toFixed(1) + "회 📈";
-        document.getElementById('report-engagement').textContent = engagementRate.toFixed(1) + "% 💖";
+        document.getElementById('report-growth').textContent = "회당 +" + growthVelocity.toFixed(1) + "회 상승";
+        document.getElementById('report-engagement').textContent = engagementRate.toFixed(1) + "%";
 
-        // AI 평가 코멘트 생성 분기
-        let aiCommentHtml = "";
-        if (engagementRate > 10.0) {
-            aiCommentHtml = "💡 <b>AI 종합 평가:</b> 엄청난 반응률입니다! 조회수 대비 좋아요가 터지고 있습니다. <b>팬덤(매니아층)</b>이 확실히 잡힌 작품이니 이 작품의 감성과 코드를 철저히 분석하세요!";
-        } else if (growthVelocity > 50.0) {
-            aiCommentHtml = "💡 <b>AI 종합 평가:</b> 조회수 상승 속도가 무섭습니다. <b>어그로(썸네일/제목)</b>가 대성공한 케이스입니다. 클릭을 유발하는 문구를 벤치마킹하는 것이 좋습니다.";
-        } else if (growthVelocity < 5.0) {
-            aiCommentHtml = "💡 <b>AI 종합 평가:</b> 조회수 성장이 정체되어 있습니다. 아래쪽의 하위 10% 그래프(파란색)와 흐름이 비슷해지고 있습니다. 지루함을 타파할 새로운 전개가 필요해 보입니다.";
+        let aiComment = "💡 <b>AI 종합 분석 결과:</b> ";
+        if (engagementRate > 8.0) {
+            aiComment += "시청자 100명 중 " + engagementRate.toFixed(0) + "명이 흔적을 남기는 초고반응 작품입니다. <b>남자 공감대 자극 요소</b>가 들어있을 확률이 높으니 스토리 전개를 벤치마킹하세요!";
+        } else if (growthVelocity > 30.0) {
+            aiComment += "상승 속도가 👑대박 기준선과 가깝습니다. 썸네일이나 제목에서 <b>어그로(호기심 자극)</b>가 압도적으로 성공한 상태입니다.";
         } else {
-            aiCommentHtml = "💡 <b>AI 종합 평가:</b> 매우 안정적인 정석 그래프를 그리고 있습니다. 롱런(Long-run)할 가능성이 높은 구성입니다.";
+            aiComment += "성장 궤적이 🐢쪽박 기준선과 평행을 달리고 있습니다. 유저들이 클릭 후 3초 이내에 이탈한다는 뜻이니, 초반부 몰입감을 개선해야 합니다.";
         }
-        document.getElementById('ai-comment-box').innerHTML = aiCommentHtml;
-
-        // 모달창 띄우기
+        document.getElementById('ai-comment-box').innerHTML = aiComment;
         document.getElementById('deep-analysis-modal').classList.add('open');
 
-        // 5. 대망의 극한 대조 차트 그리기
-        if (deepAnalysisChartObj !== null) {
-            deepAnalysisChartObj.destroy();
-        }
-        
-        const compCtx = document.getElementById('deep-compare-line').getContext('2d');
-        
-        // 타겟(빨강), 상위1%(주황-골드), 하위10%(파랑) 설정
-        deepAnalysisChartObj = new Chart(compCtx, {
+        if (deepAnalysisChartObj !== null) deepAnalysisChartObj.destroy();
+        deepAnalysisChartObj = new Chart(document.getElementById('deep-compare-line').getContext('2d'), {
             type: 'line',
             data: {
                 labels: compareLabels,
                 datasets: [
-                    { 
-                        label: '🎯 현재 분석 타겟', 
-                        data: targetViewsArray, 
-                        borderColor: '#FF6B6B', 
-                        borderWidth: 4, 
-                        pointRadius: 6,
-                        fill: false 
-                    },
-                    { 
-                        label: '👑 상위 1% (대박 기준선)', 
-                        data: topViewsArray, 
-                        borderColor: '#FFD93D', 
-                        borderWidth: 3, 
-                        borderDash: [5, 5], // 점선 처리
-                        fill: false 
-                    },
-                    { 
-                        label: '🐢 하위 10% (쪽박 기준선)', 
-                        data: bottomViewsArray, 
-                        borderColor: '#4D96FF', 
-                        borderWidth: 3, 
-                        borderDash: [2, 4], // 촘촘한 점선 처리
-                        fill: false 
-                    }
+                    { label: '🎯 타겟: ' + targetWork.name, data: targetViews, borderColor: '#FF6B6B', borderWidth: 4, pointRadius: 5, fill: false },
+                    { label: '👑 상위 1% 대박선 (' + absoluteBest.name.slice(0,8) + ')', data: topViews, borderColor: '#FFD93D', borderWidth: 2, borderDash: [4, 4], fill: false },
+                    { label: '🐢 하위 10% 쪽박선 (' + absoluteWorst.name.slice(0,8) + ')', data: bottomViews, borderColor: '#4D96FF', borderWidth: 2, borderDash: [2, 4], fill: false }
                 ]
             },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-            }
+            options: { responsive: true, maintainAspectRatio: false }
         });
     }
 
     // ---------------------------------------------------------
-    // 9. 모달 제어 및 URL 저장, 삭제 로직
+    // 9. 인터페이스 수납 관리
     // ---------------------------------------------------------
     function drawEmojiGridButtons() {
-        const gridContainer = document.getElementById('emoji-grid');
-        gridContainer.innerHTML = '';
-        
+        const gridContainer = document.getElementById('emoji-grid'); gridContainer.innerHTML = '';
         for (let i = 0; i < AVAILABLE_EMOJIS.length; i++) {
             const emojiChar = AVAILABLE_EMOJIS[i];
-            const buttonElement = document.createElement('button');
-            buttonElement.className = 'emoji-btn';
-            
-            if (emojiChar === currentSelectedEmoji) {
-                buttonElement.classList.add('selected');
-            }
-            
-            buttonElement.textContent = emojiChar;
-            
-            buttonElement.onclick = function() {
+            const btn = document.createElement('button'); btn.className = 'emoji-btn';
+            if (emojiChar === currentSelectedEmoji) btn.classList.add('selected');
+            btn.textContent = emojiChar; btn.type = 'button';
+            btn.onclick = function() {
                 currentSelectedEmoji = emojiChar;
-                const allEmojiButtons = document.querySelectorAll('.emoji-btn');
-                for (let j = 0; j < allEmojiButtons.length; j++) {
-                    allEmojiButtons[j].classList.remove('selected');
-                }
-                buttonElement.classList.add('selected');
+                document.querySelectorAll('.emoji-btn').forEach(function(b) { b.classList.remove('selected'); });
+                btn.classList.add('selected');
             };
-            
-            gridContainer.appendChild(buttonElement);
+            gridContainer.appendChild(btn);
         }
     }
 
     function openAddUrlModal() {
-        document.getElementById('m-url').value = '';
-        currentSelectedEmoji = AVAILABLE_EMOJIS[0];
-        drawEmojiGridButtons();
-        document.getElementById('add-modal').classList.add('open');
+        document.getElementById('m-url').value = ''; currentSelectedEmoji = AVAILABLE_EMOJIS[0];
+        drawEmojiGridButtons(); document.getElementById('add-modal').classList.add('open');
     }
-
-    function closeAddModal() {
-        document.getElementById('add-modal').classList.remove('open');
-    }
-
-    function closeDeepAnalysisModal() {
-        document.getElementById('deep-analysis-modal').classList.remove('open');
-    }
+    function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+    function closeDeepAnalysisModal() { document.getElementById('deep-analysis-modal').classList.remove('open'); }
 
     async function saveMyURLToDatabase() {
-        const urlInputElem = document.getElementById('m-url');
-        const typedUrl = urlInputElem.value.trim();
-        
-        const topicSelectElem = document.getElementById('m-topic');
-        const selectedTopic = topicSelectElem.value;
-        
-        if (typedUrl === '' || typedUrl.includes('playentry.org') === false) { 
-            alert('올바른 엔트리 주소를 입력해 주세요!'); 
-            return; 
-        }
+        const typedUrl = document.getElementById('m-url').value.trim();
+        const selectedTopic = document.getElementById('m-topic').value;
+        if (typedUrl === '' || typedUrl.includes('playentry.org') === false) { alert('올바른 엔트리 주소를 입력해 주세요!'); return; }
 
-        const recordObject = {
-            username: currentLoggedInUser, 
-            work_name: "⏳ 자동 수집 대기 중...", 
-            entry_url: typedUrl,
-            views: 0, 
-            likes: 0, 
-            comments: 0, 
-            bookmarks: 0, 
-            topic: selectedTopic, 
-            emoji: currentSelectedEmoji
-        };
-
-        const response = await supabaseClient.from('works').insert([recordObject]);
-        
-        if (response.error) {
-            console.error(response.error);
-            alert('저장에 실패했습니다.');
-            return;
-        }
-
-        closeAddModal();
-        alert('내 작품이 등록되었습니다! 봇이 30분 뒤 제목과 데이터를 채워 넣습니다.');
-        fetchDatabaseData();
+        await supabaseClient.from('works').insert([{
+            username: currentLoggedInUser, work_name: "⏳ 자동 수집 대기 중...", entry_url: typedUrl,
+            views: 0, likes: 0, comments: 0, bookmarks: 0, topic: selectedTopic, emoji: currentSelectedEmoji
+        }]);
+        closeAddModal(); alert('내 작품이 추가되었습니다! 공장이 30분 주기로 실시간 계측합니다.'); fetchDatabaseData();
     }
 
     async function deleteCurrentWork() {
-        const isConfirmed = confirm('정말 삭제하시겠습니까?');
-        if (isConfirmed === false) {
-            return;
-        }
-        
-        const response = await supabaseClient.from('works').delete().eq('work_name', currentDetailWorkName);
-        
-        if (response.error) {
-            console.error(response.error);
-            alert('삭제에 실패했습니다.');
-            return;
-        }
-        
-        switchMainView('home');
-        fetchDatabaseData();
+        if (confirm('포트폴리오에서 삭제할까요?') === false) return;
+        await supabaseClient.from('works').delete().eq('work_name', currentDetailWorkName).eq('username', currentLoggedInUser);
+        switchMainView('home'); fetchDatabaseData();
     }
 </script>
 </body>
